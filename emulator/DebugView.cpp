@@ -454,14 +454,6 @@ m_DebugViewPorts[] =
 {
     { 0177660, _T("keyb state") },
     { 0177662, _T("keyb data") },
-    { 0177664, _T("scroll") },
-    { 0177706, _T("timer reload") },
-    { 0177710, _T("timer value") },
-    { 0177712, _T("timer manage") },
-    { 0177714, _T("parallel") },
-    { 0177716, _T("system") },
-    { 0177130, _T("floppy state") },
-    { 0177132, _T("floppy data") },
 };
 
 void DebugView_DrawPorts(HDC hdc, const CMotherboard* /*pBoard*/, int x, int y)

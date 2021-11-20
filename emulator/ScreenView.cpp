@@ -256,11 +256,11 @@ BYTE GetChessFugure(int row, int col)
     case 004: figure = 0x04; break;  // конь
     case 006: figure = 0x06; break;  // слон
     case 010: figure = 0x08; break;  // ладья
-    case 012: figure = 0x0a; break;  // ферзь
-    case 014: figure = 0x0c; break;  // король
+    case 012: figure = 0x0c; break;  // ферзь
+    case 014: figure = 0x0a; break;  // король
     default: figure = 0;
     }
-    figure |= isblack ? 0 : 0x80;
+    figure |= isblack ? 0x80 : 0;
 
     return figure;
 };

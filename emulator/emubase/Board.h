@@ -121,8 +121,6 @@ public:
     bool        SystemFrame();  // Do one frame -- use for normal run
     void        KeyboardEvent(uint8_t scancode, bool okPressed, bool okAr2);  // Key pressed or released
     uint16_t    GetKeyboardRegister(void);
-    uint16_t    GetPrinterOutPort() const { return m_Port177714out; }
-    void        SetPrinterInPort(uint8_t data);
     int         GetSoundChanges() const { return m_SoundChanges; }  ///< Sound signal 0 to 1 changes since the beginning of the frame
 public:  // Callbacks
     void        SetSoundGenCallback(SOUNDGENCALLBACK callback);
@@ -145,8 +143,6 @@ public:  // Memory
     uint16_t GetPortView(uint16_t address) const;
     // Read SEL register
     uint16_t GetSelRegister() const { return m_Port177716; }
-    // Get palette number 0..15 (BK0011 only)
-    uint8_t GetPalette() const { return (m_Port177662wr >> 8) & 0x0f; }
     // Get video buffer address
     const uint8_t* GetVideoBuffer();
 private:
@@ -164,16 +160,8 @@ public:  // Saving/loading emulator status
     void        SaveToImage(uint8_t* pImage);
     void        LoadFromImage(const uint8_t* pImage);
 private:  // Ports: implementation
-    uint16_t    m_Port177560;       // Serial port input state register
-    uint16_t    m_Port177562;       // Serial port input data register
-    uint16_t    m_Port177564;       // Serial port output state register
-    uint16_t    m_Port177566;       // Serial port output data register
     uint16_t    m_Port177660;       // Keyboard status register
     uint16_t    m_Port177662rd;     // Keyboard register
-    uint16_t    m_Port177662wr;     // Palette register
-    uint16_t    m_Port177664;       // Scroll register
-    uint16_t    m_Port177714in;     // Parallel port, input register
-    uint16_t    m_Port177714out;    // Parallel port, output register
     uint16_t    m_Port177716;       // System register (read only)
     uint16_t    m_Port177716mem;    // System register (memory)
     uint16_t    m_Port177716tap;    // System register (tape)

@@ -505,7 +505,6 @@ void Emulator_KeyEvent(BYTE keyscan, BOOL okPressed)
 //   4 bytes        BK_IMAGE_SIZE
 //   4 bytes        BK uptime
 //   12 bytes       Not used
-//TODO: 256 bytes * 4 - Floppy 1..4 path
 
 bool Emulator_SaveImage(LPCTSTR sFilePath)
 {

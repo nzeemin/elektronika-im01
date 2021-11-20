@@ -409,12 +409,11 @@ void MainWindow_AdjustWindowLayout()
     }
     if (Settings_GetDebug())  // Debug views shown
     {
-        cxScreen = 580;
+        cxScreen = BK_SCREEN_WIDTH + 8;
         cyScreen = BK_SCREEN_HEIGHT + 8;
 
         int yKeyboard = yScreen + cyScreen + (Settings_GetKeyboard() ? 0 : 4);
-        int yTape = yKeyboard;
-        int yConsole = yTape;
+        int yConsole = yKeyboard;
 
         if (Settings_GetKeyboard())
         {
@@ -423,7 +422,6 @@ void MainWindow_AdjustWindowLayout()
             int cyKeyboard = rcKeyboard.bottom - rcKeyboard.top;
             int xKeyboard = (cxScreen - cxKeyboard) / 2;
             SetWindowPos(g_hwndKeyboard, NULL, xKeyboard, yKeyboard, cxKeyboard, cyKeyboard, SWP_NOZORDER);
-            yTape += cyKeyboard + 4;
             yConsole += cyKeyboard + 4;
         }
 

@@ -86,14 +86,8 @@ void CMotherboard::Reset ()
     m_pCPU->Stop();
 
     // Reset ports
-    m_Port177560 = m_Port177562 = 0;
-    m_Port177564 = 0200;
-    m_Port177566 = 0;
     m_Port177660 = 0100;
     m_Port177662rd = 0;
-    m_Port177662wr = 047400;
-    m_Port177664 = 01330;
-    m_Port177714in = m_Port177714out = 0;
     m_Port177716 = 0020000 | 0300;
     m_Port177716mem = 0000002;
     m_Port177716tap = 0200;
@@ -182,9 +176,7 @@ uint8_t CMotherboard::GetROMByte(uint16_t offset) const
 void CMotherboard::ResetDevices()
 {
     // Reset ports
-    m_Port177560 = m_Port177562 = 0;
-    m_Port177564 = 0200;
-    m_Port177566 = 0;
+    //TODO
 
     // Reset timer
     m_timerflags = 0177400;
@@ -194,7 +186,7 @@ void CMotherboard::ResetDevices()
 
 void CMotherboard::Tick50()  // 50 Hz timer
 {
-    if ((m_Port177662wr & 040000) == 0)
+    //if ((m_Port177662wr & 040000) == 0)
     {
         m_pCPU->TickIRQ2();
     }
@@ -513,42 +505,15 @@ uint8_t CMotherboard::GetPortByte(uint16_t address)
 
 uint16_t CMotherboard::GetPortWord(uint16_t address)
 {
+    DebugLogFormat(_T("READ PORT %06o PC=%06o\r\n"), address, m_pCPU->GetInstructionPC());
+
     switch (address)
     {
-    case 0177560:  // Serial port recieve status
-        return m_Port177560;
-    case 0177562:  // Serial port recieve data
-        return m_Port177562;
-    case 0177564:  // Serial port translate status
-        return m_Port177564;
-    case 0177566:  // Serial port interrupt vector
-        return 060;
-
-    case 0177700:  // Регистр режима (РР) ВМ1
-        return 0177740;
-    case 0177702:  // Регистр адреса прерывания (РАП) ВМ1
-        return 0177777;
-    case 0177704:  // Регистр ошибки (РОШ) ВМ1
-        return 0177440;
-
-    case 0177706:  // System Timer counter start value -- регистр установки таймера
-        return m_timerreload;
-    case 0177710:  // System Timer Counter -- регистр счетчика таймера
-        return m_timer;
-    case 0177712:  // System Timer Manage -- регистр управления таймера
-        return m_timerflags;
-
     case 0177660:  // Keyboard status register
         return m_Port177660;
     case 0177662:  // Keyboard register
         m_Port177660 &= ~0200;  // Reset "Ready" bit
         return m_Port177662rd;
-
-    case 0177664:  // Scroll register
-        return m_Port177664;
-
-    case 0177714:  // Parallel port register: printer, joystick
-        return m_Port177714in;
 
     case 0177716:  // System register
         {
@@ -569,6 +534,9 @@ uint16_t CMotherboard::GetPortWord(uint16_t address)
     case 0164074:  // ???
         return 0;
 
+    case 0164076:  // ???
+        return 0;
+
     case 0177750:  // ???
         return 0;//STUB
 
@@ -577,6 +545,7 @@ uint16_t CMotherboard::GetPortWord(uint16_t address)
 
     default:
         m_pCPU->MemoryError();
+        DebugLogFormat(_T("READ UNKNOWN PORT %06o PC=%06o\r\n"), address, m_pCPU->GetInstructionPC());
         return 0;
     }
 
@@ -588,29 +557,10 @@ uint16_t CMotherboard::GetPortView(uint16_t address) const
 {
     switch (address)
     {
-    case 0177560:  // Serial port recieve status
-        return m_Port177560;
-    case 0177562:  // Serial port recieve data
-        return m_Port177562;
-    case 0177564:  // Serial port translate status
-        return m_Port177564;
-    case 0177566:  // Serial port interrupt vector
-        return 060;
-
-    case 0177706:  // System Timer counter start value -- регистр установки таймера
-        return m_timerreload;
-    case 0177710:  // System Timer Counter -- регистр счетчика таймера
-        return m_timer;
-    case 0177712:  // System Timer Manage -- регистр управления таймера
-        return m_timerflags;
-
     case 0177660:  // Keyboard status register
         return m_Port177660;
     case 0177662:  // Keyboard data register
         return m_Port177662rd;
-
-    case 0177664:  // Scroll register
-        return m_Port177664;
 
     case 0177716:  // System register
         return m_Port177716;
@@ -625,6 +575,9 @@ uint16_t CMotherboard::GetPortView(uint16_t address) const
         return 0;
 
     case 0164074:  // ???
+        return 0;
+
+    case 0164076:  // ???
         return 0;
 
     case 0177750:  // ???
@@ -659,67 +612,10 @@ void CMotherboard::SetPortByte(uint16_t address, uint8_t byte)
 //void DebugPrintFormat(LPCTSTR pszFormat, ...);  //DEBUG
 void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
 {
+    DebugLogFormat(_T("WRITE PORT %06o value %06o PC=%06o\r\n"), address, word, m_pCPU->GetInstructionPC());
+
     switch (address)
     {
-    case 0177560:
-        m_Port177560 = word;
-        break;
-    case 0177562:
-        //TODO
-        break;
-    case 0177564:  // Serial port output status register
-//        DebugPrintFormat(_T("177564 write '%06o'\r\n"), word);
-        m_Port177564 = word;
-        break;
-    case 0177566:  // Serial port output data
-//        DebugPrintFormat(_T("177566 write '%c'\r\n"), (uint8_t)word);
-        m_Port177566 = word;
-        m_Port177564 &= ~0200;
-        break;
-
-    case 0177700: case 0177702: case 0177704:  // Unknown something
-        break;
-
-    case 0177706:  // System Timer reload value -- регистр установки таймера
-        SetTimerReload(word);
-        break;
-    case 0177710:  // System Timer Counter -- регистр реверсивного счетчика таймера
-        //Do nothing: the register is read-only
-        break;
-    case 0177712:  // System Timer Manage -- регистр управления таймера
-        SetTimerState(word);
-        break;
-
-    case 0177714:  // Parallel port register
-        m_Port177714out = word;
-        break;
-
-    case 0177716:  // System register - memory management, tape management
-        m_Port177716 |= 4;  // Set bit 2
-        if (word & 04000)
-        {
-            m_Port177716mem = word;
-
-//            DebugLogFormat(_T("177716mem %06o\t\t%06o\r\n"), word, m_pCPU->GetInstructionPC());
-        }
-        else
-        {
-            m_Port177716tap = word;
-        }
-        break;
-
-    case 0177660:  // Keyboard status register
-        //TODO
-        break;
-
-    case 0177662:  // Palette register
-        m_Port177662wr = word;
-        break;
-
-    case 0177664:  // Scroll register
-        m_Port177664 = word & 01377;
-        break;
-
     case 0164004:  // ???
         break;
 
@@ -732,6 +628,9 @@ void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
     case 0164074:  // ???
         break;
 
+    case 0164076:  // ???
+        break;
+
     case 0177750:  // ???
         break;
 
@@ -740,6 +639,7 @@ void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
 
     default:
         m_pCPU->MemoryError();
+        DebugLogFormat(_T("WRITE UNKNOWN PORT %06o PC=%06o value %06o\r\n"), address, m_pCPU->GetInstructionPC(), word);
         break;
     }
 }
@@ -762,16 +662,8 @@ void CMotherboard::SaveToImage(uint8_t* pImage)
     uint16_t* pwImage = (uint16_t*) (pImage + 32);
     *pwImage++ = m_Configuration;
     pwImage += 6;  // RESERVED
-    *pwImage++ = m_Port177560;
-    *pwImage++ = m_Port177562;
-    *pwImage++ = m_Port177564;
-    *pwImage++ = m_Port177566;
     *pwImage++ = m_Port177660;
     *pwImage++ = m_Port177662rd;
-    *pwImage++ = m_Port177662wr;
-    *pwImage++ = m_Port177664;
-    *pwImage++ = m_Port177714in;
-    *pwImage++ = m_Port177714out;
     *pwImage++ = m_Port177716;
     *pwImage++ = m_Port177716mem;
     *pwImage++ = m_Port177716tap;
@@ -797,16 +689,8 @@ void CMotherboard::LoadFromImage(const uint8_t* pImage)
     uint16_t* pwImage = (uint16_t*) (pImage + 32);
     m_Configuration = *pwImage++;
     pwImage += 6;  // RESERVED
-    m_Port177560 = *pwImage++;
-    m_Port177562 = *pwImage++;
-    m_Port177564 = *pwImage++;
-    m_Port177566 = *pwImage++;
     m_Port177660 = *pwImage++;
     m_Port177662rd = *pwImage++;
-    m_Port177662wr = *pwImage++;
-    m_Port177664 = *pwImage++;
-    m_Port177714in = *pwImage++;
-    m_Port177714out = *pwImage++;
     m_Port177716 = *pwImage++;
     m_Port177716mem = *pwImage++;
     m_Port177716tap = *pwImage++;
