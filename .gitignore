@@ -9,12 +9,8 @@ Release
 *.opensdf
 .vs
 ipch
-*.rom
-trace.log
 /emulator/Version.h
 trace.log
-*.dsk
-*.img
 *.lst
 *.txt
 /x-*
