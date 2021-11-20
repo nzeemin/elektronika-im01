@@ -1,0 +1,279 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#define APSTUDIO_HIDDEN_SYMBOLS
+#include "windows.h"
+#undef APSTUDIO_HIDDEN_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Russian resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+#ifdef _WIN32
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+#pragma code_page(1251)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#define APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "#include ""windows.h""\r\n"
+    "#undef APSTUDIO_HIDDEN_SYMBOLS\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Russian resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Neutral resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
+#ifdef _WIN32
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_APPICON             ICON                    "Emulator.ico"
+IDI_SMALL               ICON                    "small.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDC_APPLICATION MENU 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "Load State…",                 ID_FILE_LOADSTATE
+        MENUITEM "Save State…",                 ID_FILE_SAVESTATE
+        MENUITEM SEPARATOR
+        MENUITEM "Settings General",            ID_FILE_SETTINGS
+        MENUITEM "Settings Fonts and Colors",   ID_FILE_SETTINGS_COLORS
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tAlt+F4",               IDM_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "Toolbar",                     ID_VIEW_TOOLBAR
+        MENUITEM "Keyboard",                    ID_VIEW_KEYBOARD
+    END
+    POPUP "&Emulator"
+    BEGIN
+        MENUITEM "Run",                         ID_EMULATOR_RUN
+        MENUITEM "Reset",                       ID_EMULATOR_RESET
+        MENUITEM "Autostart",                   ID_EMULATOR_AUTOSTART
+        MENUITEM SEPARATOR
+        MENUITEM "Sound",                       ID_EMULATOR_SOUND
+        MENUITEM SEPARATOR
+        MENUITEM "Speed 25%",                   ID_EMULATOR_SPEED25
+        MENUITEM "Speed 50%",                   ID_EMULATOR_SPEED50
+        MENUITEM "Speed 100%",                  ID_EMULATOR_REALSPEED
+        MENUITEM "Speed 200%",                  ID_EMULATOR_SPEED200
+        MENUITEM "Speed MAX",                   ID_EMULATOR_SPEEDMAX
+    END
+    POPUP "&Configuration"
+    BEGIN
+        MENUITEM "IM-01",                       ID_CONF_BK0010BASIC
+        MENUITEM "IM-01T",                      ID_CONF_BK0010FOCAL
+    END
+    POPUP "Debug"
+    BEGIN
+        MENUITEM "Debug Views",                 ID_VIEW_DEBUG
+        MENUITEM "Memory Map",                  ID_VIEW_MEMORYMAP
+        MENUITEM SEPARATOR
+        MENUITEM "Step Into\tF11",              ID_DEBUG_STEPINTO
+        MENUITEM "Step Over\tShift+F11",        ID_DEBUG_STEPOVER
+        MENUITEM SEPARATOR
+        MENUITEM "Clear Console Log",           ID_DEBUG_CLEARCONSOLE
+        MENUITEM "Delete All Breakpoints",      ID_DEBUG_DELETEALLBREAKPTS
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About",                      IDM_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDC_APPLICATION ACCELERATORS 
+BEGIN
+    VK_F11,         ID_DEBUG_STEPINTO,      VIRTKEY, NOINVERT
+    VK_F11,         ID_DEBUG_STEPOVER,      VIRTKEY, SHIFT, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 22, 17, 280, 153
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_CAPTION | WS_SYSMENU
+CAPTION "About"
+FONT 8, "MS Shell Dlg", 400, 0, 0xCC
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,211,10,57,15,WS_GROUP
+    LTEXT           "Elektronika IM-01 Version 1.0.???",IDC_VERSION,10,10,139,8,SS_NOPREFIX
+    LTEXT           "Build date: ????",IDC_BUILDDATE,10,20,139,8
+    CONTROL         "<a>https://github.com/nzeemin/elektronika-im01</a>",IDC_SYSLINK1,"SysLink",WS_TABSTOP,10,32,193,10
+    LTEXT           "Copyright (C) 2021",IDC_STATIC,10,44,139,8
+    LTEXT           "Author:\r\nNikita Zimin (nzeemin@gmail.com)",IDC_STATIC,10,60,174,36
+END
+
+IDD_INPUTBOX DIALOGEX 0, 0, 209, 48
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOOLWINDOW
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,145,7,57,14
+    PUSHBUTTON      "Cancel",IDCANCEL,146,24,57,14
+    LTEXT           "Octal:",IDC_STATIC,7,7,50,8
+    EDITTEXT        IDC_EDIT1,7,17,50,14,ES_AUTOHSCROLL
+    LTEXT           "Hex:",IDC_STATIC,67,7,50,8
+    EDITTEXT        IDC_EDIT2,67,17,50,14,ES_AUTOHSCROLL
+END
+
+IDD_SETTINGS DIALOGEX 64, 40, 246, 239
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Sound volume:",IDC_STATIC,8,15,64,8
+    CONTROL         "",IDC_VOLUME,"msctls_trackbar32",TBS_AUTOTICKS | TBS_BOTH | WS_TABSTOP,75,7,164,23
+    DEFPUSHBUTTON   "OK",IDOK,136,218,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,218,50,14
+END
+
+IDD_SETTINGS_COLORS DIALOGEX 64, 40, 246, 239
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings Fonts and Colors"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Debug font:",IDC_STATIC,8,15,61,8
+    COMBOBOX        IDC_DEBUGFONT,84,13,147,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Colors:",IDC_STATIC,8,32,61,8
+    LISTBOX         IDC_LIST1,8,42,160,160,LBS_NOTIFY | WS_BORDER | WS_VSCROLL | LBS_DISABLENOSCROLL | LBS_OWNERDRAWFIXED
+    PUSHBUTTON      "Choose Color",IDC_BUTTON1,172,42,64,14
+    PUSHBUTTON      "Reset Color",IDC_BUTTON2,172,72,64,14
+    DEFPUSHBUTTON   "OK",IDOK,136,218,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,189,218,50,14
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        VERTGUIDE, 10
+        BOTTOMMARGIN, 141
+        HORZGUIDE, 10
+    END
+
+    IDD_INPUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 41
+    END
+
+    IDD_CREATEDISK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 171
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 91
+    END
+
+    IDD_LOADBIN, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 309
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 102
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_TOOLBAR             BITMAP                  "Toolbar.bmp"
+IDB_CHESS_PIECES        BITMAP                  "ChessPieces40.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_APP_TITLE           "Elektronika IM-01"
+    IDC_APPLICATION         "ELEKTRONIKAIM01"
+END
+
+#endif    // Neutral resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
