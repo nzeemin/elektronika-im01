@@ -381,18 +381,17 @@ void MainWindow_AdjustWindowLayout()
 
     if (!Settings_GetDebug())  // No debug views
     {
-        cxScreen = rc.right;
+        cxScreen = BK_SCREEN_WIDTH;
+        cyScreen = BK_SCREEN_HEIGHT;
 
-        int yTape = rc.bottom - cyStatus + 4;
-
-        int yKeyboard = yTape;
+        int yKeyboard = yScreen;
         int cxKeyboard = 0, cyKeyboard = 0;
         if (Settings_GetKeyboard())  // Snapped to bottom
         {
             RECT rcKeyboard;  GetWindowRect(g_hwndKeyboard, &rcKeyboard);
-            cxKeyboard = cxScreen;
-            cyKeyboard = rcKeyboard.bottom - rcKeyboard.top;
-            yKeyboard = yTape - cyKeyboard - 4;
+            cxKeyboard = 200;
+            cyKeyboard = cyScreen;
+            //yKeyboard = yTape - cyKeyboard - 4;
         }
 
         cyScreen = yKeyboard - yScreen - (Settings_GetKeyboard() ? 0 : 4);
@@ -404,39 +403,41 @@ void MainWindow_AdjustWindowLayout()
 
         if (Settings_GetKeyboard())
         {
-            SetWindowPos(g_hwndKeyboard, NULL, 0, yKeyboard, cxScreen, cyKeyboard, SWP_NOZORDER);
+            SetWindowPos(g_hwndKeyboard, NULL, cxScreen, yKeyboard, cxKeyboard, cyKeyboard, SWP_NOZORDER);
         }
     }
     if (Settings_GetDebug())  // Debug views shown
     {
-        cxScreen = BK_SCREEN_WIDTH + 8;
-        cyScreen = BK_SCREEN_HEIGHT + 8;
+        cxScreen = BK_SCREEN_WIDTH;
+        cyScreen = BK_SCREEN_HEIGHT;
 
-        int yKeyboard = yScreen + cyScreen + (Settings_GetKeyboard() ? 0 : 4);
-        int yConsole = yKeyboard;
+        int yKeyboard = yScreen;
+        int yConsole = yScreen + cyScreen + 4;
+        int xDisasm = cxScreen + 4;
 
+        int cxKeyboard = 0;
         if (Settings_GetKeyboard())
         {
             RECT rcKeyboard;  GetWindowRect(g_hwndKeyboard, &rcKeyboard);
-            int cxKeyboard = cxScreen;
-            int cyKeyboard = rcKeyboard.bottom - rcKeyboard.top;
-            int xKeyboard = (cxScreen - cxKeyboard) / 2;
+            cxKeyboard = 200;
+            int cyKeyboard = cyScreen;
+            int xKeyboard = cxScreen;
             SetWindowPos(g_hwndKeyboard, NULL, xKeyboard, yKeyboard, cxKeyboard, cyKeyboard, SWP_NOZORDER);
-            yConsole += cyKeyboard + 4;
+            xDisasm += cxKeyboard;
         }
 
         int cyConsole = rc.bottom - cyStatus - yConsole - 4;
-        SetWindowPos(g_hwndConsole, NULL, 0, yConsole, cxScreen, cyConsole, SWP_NOZORDER);
+        SetWindowPos(g_hwndConsole, NULL, 0, yConsole, cxScreen + cxKeyboard, cyConsole, SWP_NOZORDER);
 
         RECT rcDebug;  GetWindowRect(g_hwndDebug, &rcDebug);
-        int cxDebug = rc.right - cxScreen - 4;
+        int cxDebug = rc.right - xDisasm;
         int cyDebug = rcDebug.bottom - rcDebug.top;
-        SetWindowPos(g_hwndDebug, NULL, cxScreen + 4, 0, cxDebug, cyDebug, SWP_NOZORDER);
+        SetWindowPos(g_hwndDebug, NULL, xDisasm, 0, cxDebug, cyDebug, SWP_NOZORDER);
 
         int yMemory = yConsole;
-        int cxMemory = rc.right - cxScreen - 4;
+        int cxMemory = rc.right - xDisasm;
         int cyMemory = rc.bottom - yMemory;
-        SetWindowPos(g_hwndMemory, NULL, cxScreen + 4, yMemory, cxMemory, cyMemory, SWP_NOZORDER);
+        SetWindowPos(g_hwndMemory, NULL, xDisasm, yMemory, cxMemory, cyMemory, SWP_NOZORDER);
 
         int yDisasm = cyDebug + 4;
         int cyDisasm = yMemory - yDisasm - 4;
@@ -452,9 +453,9 @@ void MainWindow_AdjustWindowLayout()
             SetWindowPos(g_hwndMemoryMap, NULL, xMemoryMap, yDisasm, cxMemoryMap, cyMemoryMap, SWP_NOZORDER);
         }
 
-        SetWindowPos(g_hwndDisasm, NULL, cxScreen + 4, yDisasm, cxDisasm, cyDisasm, SWP_NOZORDER);
+        SetWindowPos(g_hwndDisasm, NULL, xDisasm, yDisasm, cxDisasm, cyDisasm, SWP_NOZORDER);
 
-        SetWindowPos(m_hwndSplitter, NULL, cxScreen + 4, yMemory - 4, cxDebug, 4, SWP_NOZORDER);
+        SetWindowPos(m_hwndSplitter, NULL, xDisasm, yMemory - 4, cxDebug, 4, SWP_NOZORDER);
     }
 
     SetWindowPos(m_hwndToolbar, NULL, 4, 4, cxScreen, cyToolbar, SWP_NOZORDER);

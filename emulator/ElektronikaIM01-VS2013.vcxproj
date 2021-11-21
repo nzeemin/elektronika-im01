@@ -138,7 +138,6 @@
     <ClInclude Include="SoundGen.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="ToolWindow.h" />
-    <ClInclude Include="Version.h" />
     <ClInclude Include="Views.h" />
   </ItemGroup>
   <ItemGroup>

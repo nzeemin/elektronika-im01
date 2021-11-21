@@ -39,9 +39,6 @@
     <ClInclude Include="Dialogs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Version.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -138,13 +135,5 @@
     <ResourceCompile Include="res\Emulator.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="res\Chess.bin">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\Chess2.bin">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

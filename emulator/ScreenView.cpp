@@ -18,10 +18,10 @@ ELEKTRONIKA-IM01. If not, see <http://www.gnu.org/licenses/>. */
 //////////////////////////////////////////////////////////////////////
 
 
-#define COLOR_BK_BACKGROUND RGB(140,140,140)
-#define COLOR_BOARD_WHITE RGB(240,240,240)
-#define COLOR_BOARD_BLACK RGB(180,180,180)
-#define COLOR_BOARD_TEXT RGB(240,240,240)
+#define COLOR_BK_BACKGROUND RGB(233,225,189)
+#define COLOR_BOARD_WHITE RGB(200,200,180)
+#define COLOR_BOARD_BLACK RGB(100,100,100)
+#define COLOR_BOARD_TEXT RGB(140,140,140)
 
 HWND g_hwndScreen = NULL;  // Screen View window handle
 
@@ -150,8 +150,9 @@ BOOL ScreenView_OnKeyEvent(WPARAM vkey, BOOL okExtKey, BOOL okPressed)
 void ScreenView_OnDraw(HDC hdc)
 {
     RECT rc;  ::GetClientRect(g_hwndScreen, &rc);
-    int boardx = (rc.right - m_cxScreenWidth) / 2;
-    int boardy = 20;
+    int boardx = 22;
+    int boardy = 22;
+    int cellsize = 60;
 
     // Empty border
     HBRUSH hBrush = ::CreateSolidBrush(COLOR_BK_BACKGROUND);
@@ -159,7 +160,7 @@ void ScreenView_OnDraw(HDC hdc)
     PatBlt(hdc, 0, 0, rc.right, boardy, PATCOPY);
     PatBlt(hdc, 0, 0, boardx, rc.bottom, PATCOPY);
     PatBlt(hdc, boardx + m_cxScreenWidth, 0, rc.right - boardx - m_cxScreenWidth, rc.bottom, PATCOPY);
-    PatBlt(hdc, 0, boardy + 8 * 40, rc.right, rc.bottom - boardy + 8 * 40, PATCOPY);
+    PatBlt(hdc, 0, boardy + 8 * cellsize, rc.right, rc.bottom - boardy + 8 * cellsize, PATCOPY);
     ::SelectObject(hdc, hOldBrush);
     ::DeleteObject(hBrush);
 
@@ -171,16 +172,16 @@ void ScreenView_OnDraw(HDC hdc)
     HBRUSH hbrBlack = ::CreateSolidBrush(COLOR_BOARD_BLACK);
     for (int yy = 0; yy < 8; yy++)
     {
-        int celly = boardy + (7 - yy) * 40;
+        int celly = boardy + (7 - yy) * cellsize;
 
         for (int xx = 0; xx < 8; xx++)
         {
-            int cellx = boardx + xx * 40;
+            int cellx = boardx + xx * cellsize;
 
             // Board cell background
             HBRUSH hbr = ((xx ^ yy) & 1) ? hbrWhite : hbrBlack;
             ::SelectObject(hdc, hbr);
-            PatBlt(hdc, cellx, celly, 40, 40, PATCOPY);
+            PatBlt(hdc, cellx, celly, cellsize, cellsize, PATCOPY);
 
             int index = yy * 8 + xx;
             int figure = m_arrScreen_BoardData[index];
@@ -188,7 +189,7 @@ void ScreenView_OnDraw(HDC hdc)
             {
                 int figurex = (6 - ((figure & 0xf) >> 1)) * 40;
                 int figurey = (figure & 0x80) ? 0 : 40;
-                ::TransparentBlt(hdc, cellx, celly, 40, 40, hdcMem, figurex, figurey, 40, 40, RGB(128, 128, 128));
+                ::TransparentBlt(hdc, cellx, celly, cellsize, cellsize, hdcMem, figurex, figurey, 40, 40, RGB(128, 128, 128));
 
                 //PrintHexValue(buffer, figure);
                 //::DrawText(hdc, buffer + 2, 2, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_LEFT | DT_BOTTOM);
@@ -214,13 +215,13 @@ void ScreenView_OnDraw(HDC hdc)
     {
         buffer[0] = _T('1') + yy;
         buffer[1] = 0;
-        rcText.top = boardy + (7 - yy) * 40;
-        rcText.bottom = rcText.top + 40;
-        rcText.left = boardx + 8 * 40 + 4;
-        rcText.right = rcText.left + 40;
+        rcText.top = boardy + (7 - yy) * cellsize;
+        rcText.bottom = rcText.top + cellsize;
+        rcText.left = boardx + 8 * cellsize + 4;
+        rcText.right = rcText.left + cellsize;
         ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_LEFT | DT_VCENTER);
         rcText.right = boardx - 4;
-        rcText.left = rcText.right - 40;
+        rcText.left = rcText.right - cellsize;
         ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_RIGHT | DT_VCENTER);
     }
     // Column letters
@@ -228,13 +229,13 @@ void ScreenView_OnDraw(HDC hdc)
     {
         buffer[0] = _T('a') + xx;
         buffer[1] = 0;
-        rcText.left = boardx + xx * 40;
-        rcText.right = rcText.left + 40;
+        rcText.left = boardx + xx * cellsize;
+        rcText.right = rcText.left + cellsize;
         rcText.bottom = boardy - 4;
-        rcText.top = rcText.bottom - 40;
+        rcText.top = rcText.bottom - cellsize;
         ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_CENTER | DT_BOTTOM);
-        rcText.top = boardy + 8 * 40 + 4;
-        rcText.bottom = rcText.top + 40;
+        rcText.top = boardy + 8 * cellsize + 4;
+        rcText.bottom = rcText.top + cellsize;
         ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_CENTER | DT_TOP);
     }
     ::SelectObject(hdc, hOldFont);
