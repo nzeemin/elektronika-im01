@@ -229,9 +229,17 @@ void KeyboardView_OnDraw(HDC hdc)
     // Keyboard background
     HBRUSH hBkBrush = ::CreateSolidBrush(COLOR_BK_BACKGROUND);
     HGDIOBJ hOldBrush = ::SelectObject(hdc, hBkBrush);
-    ::PatBlt(hdc, 0, 0, rc.right, rc.bottom, PATCOPY);
+    ::PatBlt(hdc, 12, 120, 168, 388, PATCOPY);
     ::SelectObject(hdc, hOldBrush);
     VERIFY(::DeleteObject(hBkBrush));
+
+    HBITMAP hBmpPanel = ::LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_PANEL));
+    HDC hdcMem = ::CreateCompatibleDC(hdc);
+    HGDIOBJ hOldBitmap = ::SelectObject(hdcMem, hBmpPanel);
+    ::BitBlt(hdc, 23, 128, 146, 372, hdcMem, 0, 0, SRCCOPY);
+    ::SelectObject(hdcMem, hOldBitmap);
+    ::DeleteDC(hdcMem);
+    ::DeleteObject(hBmpPanel);
 
     if (m_nKeyboardKeyPressed != 0)
         Keyboard_DrawKey(hdc, m_nKeyboardKeyPressed);

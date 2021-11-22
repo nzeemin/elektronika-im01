@@ -130,6 +130,9 @@
     <Image Include="res\ChessPieces60.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\Panel.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\Emulator.rc">

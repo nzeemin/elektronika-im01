@@ -17,6 +17,7 @@
 #define IDD_SETTINGS                    145
 #define IDD_SETTINGS_COLORS             146
 #define IDB_CHESS_PIECES                151
+#define IDB_PANEL                       152
 #define IDC_EDIT1                       1000
 #define IDC_BUILDDATE                   1001
 #define IDC_EDITADDR                    1001

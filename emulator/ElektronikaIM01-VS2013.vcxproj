@@ -172,6 +172,7 @@
     <Image Include="res\ChessPieces60.bmp" />
     <Image Include="res\Emulator.ico" />
     <Image Include="res\Intellekt02.ico" />
+    <Image Include="res\Panel.bmp" />
     <Image Include="res\small.ico" />
     <Image Include="res\Toolbar.bmp" />
   </ItemGroup>
