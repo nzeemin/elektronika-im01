@@ -18,7 +18,8 @@ ELEKTRONIKA-IM01. If not, see <http://www.gnu.org/licenses/>. */
 //////////////////////////////////////////////////////////////////////
 
 
-#define COLOR_BK_BACKGROUND RGB(200,200,200)
+#define COLOR_BK_BACKGROUND   RGB(200,200,200)
+#define COLOR_KEYBOARD_GREEN  RGB(80,255,80)
 
 
 HWND g_hwndKeyboard = (HWND) INVALID_HANDLE_VALUE;  // Keyboard View window handle
@@ -26,6 +27,7 @@ HWND g_hwndKeyboard = (HWND) INVALID_HANDLE_VALUE;  // Keyboard View window hand
 int m_nKeyboardBitmapLeft = 0;
 int m_nKeyboardBitmapTop = 0;
 BYTE m_nKeyboardKeyPressed = 0;  // BK scan-code for the key pressed, or 0
+BYTE m_arrKeyboardSegmentsData[4] = { 0, 0156, 0354, 0 };
 
 void KeyboardView_OnDraw(HDC hdc);
 int KeyboardView_GetKeyByPoint(int x, int y);
@@ -66,6 +68,22 @@ const WORD m_arrKeyboardKeys[] =
     134, 452,  28, 23,    0057, // Arrow down
 };
 const int m_nKeyboardKeysCount = sizeof(m_arrKeyboardKeys) / sizeof(WORD) / KEYBOARD_KEYS_ARRAY_WIDTH;
+
+struct IndicatorSegment
+{
+    int x0, y0, x1, y1, x2, y2, x3, y3;
+}
+m_arrIndicatorSegments[] =
+{
+    {  2, 14,  3, 12, 14, 12, 13, 14 }, // middle
+    {  2,  0,  4,  2,  3, 11,  1, 13 }, // left-top
+    {  0, 26,  2, 13,  4, 15,  3, 24 }, // left-bottom
+    {  0, 26,  2, 24, 11, 24, 13, 26 }, // bottom
+    { 14, 13, 13, 26, 11, 24, 12, 15 }, // right-bottom
+    { 15,  0, 14, 13, 13, 11, 13,  2 }, // right-top
+    {  3,  0, 15,  0, 13,  2,  5,  2 }, // top
+};
+const int m_nKeyboardSegmentsCount = sizeof(m_arrIndicatorSegments) / sizeof(IndicatorSegment);
 
 
 //////////////////////////////////////////////////////////////////////
@@ -190,6 +208,20 @@ LRESULT CALLBACK KeyboardViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPA
     return (LRESULT)FALSE;
 }
 
+void Keyboard_DrawSegment(HDC hdc, IndicatorSegment* pSegment, int x, int y)
+{
+    POINT points[4];
+    points[0].x = x + pSegment->x0;
+    points[0].y = y + pSegment->y0;
+    points[1].x = x + pSegment->x1;
+    points[1].y = y + pSegment->y1;
+    points[2].x = x + pSegment->x2;
+    points[2].y = y + pSegment->y2;
+    points[3].x = x + pSegment->x3;
+    points[3].y = y + pSegment->y3;
+    Polygon(hdc, points, 4);
+}
+
 void KeyboardView_OnDraw(HDC hdc)
 {
     RECT rc;  ::GetClientRect(g_hwndKeyboard, &rc);
@@ -214,6 +246,26 @@ void KeyboardView_OnDraw(HDC hdc)
         rcKey.bottom = rcKey.top + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 3];
         ::DrawFocusRect(hdc, &rcKey);
     }
+
+    // Draw segment indicators
+    HBRUSH hbrGreen = ::CreateSolidBrush(COLOR_KEYBOARD_GREEN);
+    for (int ind = 0; ind < 4; ind++)
+    {
+        BYTE data = m_arrKeyboardSegmentsData[ind];
+        int segmentsx = m_nKeyboardBitmapLeft + 54 + ind * 23;
+        if (ind >= 2) segmentsx += 8;
+        int segmentsy = m_nKeyboardBitmapTop + 50;
+        for (int i = 0; i < m_nKeyboardSegmentsCount; i++)
+        {
+            if ((data & (1 << (i + 1))) == 0)
+                continue;
+            HGDIOBJ hOldBrush = ::SelectObject(hdc, hbrGreen);
+            Keyboard_DrawSegment(hdc, m_arrIndicatorSegments + i, segmentsx, segmentsy);
+            ::SelectObject(hdc, hOldBrush);
+        }
+    }
+
+    ::DeleteObject(hbrGreen);
 }
 
 // Returns: index of key under the cursor position, or -1 if not found

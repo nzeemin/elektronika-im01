@@ -187,9 +187,9 @@ void ScreenView_OnDraw(HDC hdc)
             int figure = m_arrScreen_BoardData[index];
             if (figure != 0)
             {
-                int figurex = (6 - ((figure & 0xf) >> 1)) * 40;
-                int figurey = (figure & 0x80) ? 0 : 40;
-                ::TransparentBlt(hdc, cellx, celly, cellsize, cellsize, hdcMem, figurex, figurey, 40, 40, RGB(128, 128, 128));
+                int figurex = (6 - ((figure & 0xf) >> 1)) * cellsize;
+                int figurey = (figure & 0x80) ? 0 : cellsize;
+                ::TransparentBlt(hdc, cellx, celly, cellsize, cellsize, hdcMem, figurex, figurey, cellsize, cellsize, RGB(128, 128, 128));
 
                 //PrintHexValue(buffer, figure);
                 //::DrawText(hdc, buffer + 2, 2, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_LEFT | DT_BOTTOM);

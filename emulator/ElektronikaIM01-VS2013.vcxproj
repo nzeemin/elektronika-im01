@@ -169,7 +169,7 @@
     <ResourceCompile Include="res\Emulator.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\ChessPieces40.bmp" />
+    <Image Include="res\ChessPieces60.bmp" />
     <Image Include="res\Emulator.ico" />
     <Image Include="res\Intellekt02.ico" />
     <Image Include="res\small.ico" />

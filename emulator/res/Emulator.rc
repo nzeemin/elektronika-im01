@@ -250,7 +250,7 @@ END
 //
 
 IDB_TOOLBAR             BITMAP                  "Toolbar.bmp"
-IDB_CHESS_PIECES        BITMAP                  "ChessPieces40.bmp"
+IDB_CHESS_PIECES        BITMAP                  "ChessPieces60.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

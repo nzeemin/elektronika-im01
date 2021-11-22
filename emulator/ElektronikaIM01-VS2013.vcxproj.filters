@@ -124,10 +124,10 @@
     <Image Include="res\Toolbar.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\ChessPieces40.bmp">
+    <Image Include="res\Emulator.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\Emulator.ico">
+    <Image Include="res\ChessPieces60.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
