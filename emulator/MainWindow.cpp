@@ -389,7 +389,7 @@ void MainWindow_AdjustWindowLayout()
         if (Settings_GetKeyboard())  // Snapped to bottom
         {
             RECT rcKeyboard;  GetWindowRect(g_hwndKeyboard, &rcKeyboard);
-            cxKeyboard = 200;
+            cxKeyboard = 194;
             cyKeyboard = cyScreen;
             //yKeyboard = yTape - cyKeyboard - 4;
         }
@@ -419,7 +419,7 @@ void MainWindow_AdjustWindowLayout()
         if (Settings_GetKeyboard())
         {
             RECT rcKeyboard;  GetWindowRect(g_hwndKeyboard, &rcKeyboard);
-            cxKeyboard = 200;
+            cxKeyboard = 194;
             int cyKeyboard = cyScreen;
             int xKeyboard = cxScreen;
             SetWindowPos(g_hwndKeyboard, NULL, xKeyboard, yKeyboard, cxKeyboard, cyKeyboard, SWP_NOZORDER);

@@ -67,7 +67,7 @@ void DebugLogFormat(LPCTSTR pszFormat, ...);
 // Processor register names
 const TCHAR* REGISTER_NAME[];
 
-const int BK_SCREEN_WIDTH = 522;
+const int BK_SCREEN_WIDTH = 520;
 const int BK_SCREEN_HEIGHT = 524;
 
 

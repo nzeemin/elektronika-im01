@@ -18,8 +18,11 @@ ELEKTRONIKA-IM01. If not, see <http://www.gnu.org/licenses/>. */
 //////////////////////////////////////////////////////////////////////
 
 
-#define COLOR_BK_BACKGROUND   RGB(200,200,200)
-#define COLOR_KEYBOARD_GREEN  RGB(80,255,80)
+#define COLOR_BK_BACKGROUND     RGB(255,255,233)
+#define COLOR_BK_PANEL          RGB(203,207,207)
+#define COLOR_BK_INDICATOR      RGB(0,124,14)
+#define COLOR_KEYBOARD_DIVIDER  RGB(184,169,123)
+#define COLOR_KEYBOARD_GREEN    RGB(80,255,80)
 
 
 HWND g_hwndKeyboard = (HWND) INVALID_HANDLE_VALUE;  // Keyboard View window handle
@@ -226,17 +229,37 @@ void KeyboardView_OnDraw(HDC hdc)
 {
     RECT rc;  ::GetClientRect(g_hwndKeyboard, &rc);
 
-    // Keyboard background
-    HBRUSH hBkBrush = ::CreateSolidBrush(COLOR_BK_BACKGROUND);
-    HGDIOBJ hOldBrush = ::SelectObject(hdc, hBkBrush);
-    ::PatBlt(hdc, 12, 120, 168, 388, PATCOPY);
+    // Background
+    HBRUSH hbrBackground = ::CreateSolidBrush(COLOR_BK_BACKGROUND);
+    HGDIOBJ hOldBrush = ::SelectObject(hdc, hbrBackground);
+    ::PatBlt(hdc, 0, 0, rc.right, rc.bottom, PATCOPY);
     ::SelectObject(hdc, hOldBrush);
-    VERIFY(::DeleteObject(hBkBrush));
+    VERIFY(::DeleteObject(hbrBackground));
+
+    HPEN hpenDivider = ::CreatePen(PS_SOLID, 2, COLOR_KEYBOARD_DIVIDER);
+    HGDIOBJ hOldPen = ::SelectObject(hdc, hpenDivider);
+    ::MoveToEx(hdc, 1, 0, NULL);
+    ::LineTo(hdc, 1, BK_SCREEN_HEIGHT);
+    ::SelectObject(hdc, hOldPen);
+
+    // Keyboard panel
+    HBRUSH hbrBkPanel = ::CreateSolidBrush(COLOR_BK_PANEL);
+    hOldBrush = ::SelectObject(hdc, hbrBkPanel);
+    ::PatBlt(hdc, 14, 120, 168, 388, PATCOPY);
+    ::SelectObject(hdc, hOldBrush);
+    VERIFY(::DeleteObject(hbrBkPanel));
+
+    // Indicator background
+    HBRUSH hIndBrush = ::CreateSolidBrush(COLOR_BK_INDICATOR);
+    hOldBrush = ::SelectObject(hdc, hIndBrush);
+    ::PatBlt(hdc, 14, 0, 168, 120, PATCOPY);
+    ::SelectObject(hdc, hOldBrush);
+    VERIFY(::DeleteObject(hIndBrush));
 
     HBITMAP hBmpPanel = ::LoadBitmap(g_hInst, MAKEINTRESOURCE(IDB_PANEL));
     HDC hdcMem = ::CreateCompatibleDC(hdc);
     HGDIOBJ hOldBitmap = ::SelectObject(hdcMem, hBmpPanel);
-    ::BitBlt(hdc, 23, 128, 146, 372, hdcMem, 0, 0, SRCCOPY);
+    ::BitBlt(hdc, 26, 127, 141, 372, hdcMem, 0, 0, SRCCOPY);
     ::SelectObject(hdcMem, hOldBitmap);
     ::DeleteDC(hdcMem);
     ::DeleteObject(hBmpPanel);
@@ -244,19 +267,22 @@ void KeyboardView_OnDraw(HDC hdc)
     if (m_nKeyboardKeyPressed != 0)
         Keyboard_DrawKey(hdc, m_nKeyboardKeyPressed);
 
-    //DEBUG: Show key mappings
-    for (int i = 0; i < m_nKeyboardKeysCount; i++)
-    {
-        RECT rcKey;
-        rcKey.left = m_nKeyboardBitmapLeft + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH];
-        rcKey.top = m_nKeyboardBitmapTop + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 1];
-        rcKey.right = rcKey.left + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 2];
-        rcKey.bottom = rcKey.top + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 3];
-        ::DrawFocusRect(hdc, &rcKey);
-    }
+    ////DEBUG: Show key mappings
+    //for (int i = 0; i < m_nKeyboardKeysCount; i++)
+    //{
+    //    RECT rcKey;
+    //    rcKey.left = m_nKeyboardBitmapLeft + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH];
+    //    rcKey.top = m_nKeyboardBitmapTop + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 1];
+    //    rcKey.right = rcKey.left + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 2];
+    //    rcKey.bottom = rcKey.top + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 3];
+    //    ::DrawFocusRect(hdc, &rcKey);
+    //}
 
     // Draw segment indicators
     HBRUSH hbrGreen = ::CreateSolidBrush(COLOR_KEYBOARD_GREEN);
+    HPEN hpenGreen = ::CreatePen(PS_SOLID, 1, COLOR_KEYBOARD_GREEN);
+    hOldBrush = ::SelectObject(hdc, hbrGreen);
+    hOldPen = ::SelectObject(hdc, hpenGreen);
     for (int ind = 0; ind < 4; ind++)
     {
         BYTE data = m_arrKeyboardSegmentsData[ind];
@@ -267,11 +293,11 @@ void KeyboardView_OnDraw(HDC hdc)
         {
             if ((data & (1 << (i + 1))) == 0)
                 continue;
-            HGDIOBJ hOldBrush = ::SelectObject(hdc, hbrGreen);
             Keyboard_DrawSegment(hdc, m_arrIndicatorSegments + i, segmentsx, segmentsy);
-            ::SelectObject(hdc, hOldBrush);
         }
     }
+    ::SelectObject(hdc, hOldPen);
+    ::SelectObject(hdc, hOldBrush);
 
     ::DeleteObject(hbrGreen);
 }

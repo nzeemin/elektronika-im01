@@ -18,10 +18,10 @@ ELEKTRONIKA-IM01. If not, see <http://www.gnu.org/licenses/>. */
 //////////////////////////////////////////////////////////////////////
 
 
-#define COLOR_BK_BACKGROUND RGB(233,225,189)
-#define COLOR_BOARD_WHITE RGB(200,200,180)
-#define COLOR_BOARD_BLACK RGB(100,100,100)
-#define COLOR_BOARD_TEXT RGB(140,140,140)
+#define COLOR_BK_BACKGROUND RGB(255,255,233)
+#define COLOR_BOARD_WHITE   RGB(200,200,180)
+#define COLOR_BOARD_BLACK   RGB(100,100,100)
+#define COLOR_BOARD_TEXT    RGB(140,140,140)
 
 HWND g_hwndScreen = NULL;  // Screen View window handle
 
@@ -217,9 +217,6 @@ void ScreenView_OnDraw(HDC hdc)
         buffer[1] = 0;
         rcText.top = boardy + (7 - yy) * cellsize;
         rcText.bottom = rcText.top + cellsize;
-        rcText.left = boardx + 8 * cellsize + 4;
-        rcText.right = rcText.left + cellsize;
-        ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_LEFT | DT_VCENTER);
         rcText.right = boardx - 4;
         rcText.left = rcText.right - cellsize;
         ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_RIGHT | DT_VCENTER);
@@ -231,9 +228,9 @@ void ScreenView_OnDraw(HDC hdc)
         buffer[1] = 0;
         rcText.left = boardx + xx * cellsize;
         rcText.right = rcText.left + cellsize;
-        rcText.bottom = boardy - 4;
-        rcText.top = rcText.bottom - cellsize;
-        ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_CENTER | DT_BOTTOM);
+        //rcText.bottom = boardy - 4;
+        //rcText.top = rcText.bottom - cellsize;
+        //::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_CENTER | DT_BOTTOM);
         rcText.top = boardy + 8 * cellsize + 4;
         rcText.bottom = rcText.top + cellsize;
         ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_CENTER | DT_TOP);
