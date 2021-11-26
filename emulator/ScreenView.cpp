@@ -243,11 +243,11 @@ void ScreenView_OnDraw(HDC hdc)
 BYTE GetChessFugure(int row, int col)
 {
     //bool chessconf = (g_nEmulatorConfiguration == EMU_CONF_CHESS1);
-    uint16_t addr = 000610 + row * 8 + col;
+    uint16_t addr = 000610 + (7 - row) * 8 + (7 - col);
 
     BYTE figure = g_pBoard->GetRAMByte(0, addr);
 
-    bool isblack = (figure & 0200) != 0;
+    bool isblack = (figure & 0200) == 0;
     switch (figure & 0177)
     {
     case 002: figure = 0x02; break;  // пешка

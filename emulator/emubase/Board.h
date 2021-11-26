@@ -107,7 +107,7 @@ public:
     void        ExecuteCPU();  // Execute one CPU instruction
     bool        SystemFrame();  // Do one frame -- use for normal run
     uint8_t     GetIndicator(int pos);
-    void        KeyboardEvent(uint8_t scancode, bool okPressed, bool okAr2);  // Key pressed or released
+    void        KeyboardEvent(uint8_t scancode, bool okPressed);  // Key pressed or released
     int         GetSoundChanges() const { return m_SoundChanges; }  ///< Sound signal 0 to 1 changes since the beginning of the frame
 public:  // Callbacks
     void        SetSoundGenCallback(SOUNDGENCALLBACK callback);
@@ -130,8 +130,6 @@ public:  // Memory
     uint16_t GetPortView(uint16_t address) const;
     // Read SEL register
     uint16_t GetSelRegister() const { return 0020000 | 0300; }
-    // Get video buffer address
-    const uint8_t* GetVideoBuffer();
 private:
     // Determite memory type for given address - see ADDRTYPE_Xxx constants
     //   okHaltMode - processor mode (USER/HALT)
@@ -151,6 +149,7 @@ private:  // Ports: implementation
     uint16_t    m_Port164074;       // Register D
     uint8_t     m_Indicator[5 * 8];
     void        UpdateIndicator(uint8_t mask, uint8_t value);
+    uint8_t     m_KeyMatrix[6];     // Keyboard matrix 6x4
 private:  // Timer implementation
     uint16_t    m_timer;
     uint16_t    m_timerreload;

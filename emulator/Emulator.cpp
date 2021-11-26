@@ -492,7 +492,7 @@ uint16_t Emulator_GetChangeRamStatus(uint16_t address)
 
 void Emulator_KeyEvent(BYTE keyscan, BOOL okPressed)
 {
-    //TODO
+    g_pBoard->KeyboardEvent(keyscan, okPressed);
 }
 
 

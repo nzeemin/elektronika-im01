@@ -45,30 +45,30 @@ const int KEYBOARD_KEYS_ARRAY_WIDTH = 5;
 const WORD m_arrKeyboardKeys[] =
 {
     /* x1, y1   w, h      code */
-    58,  144,  28, 23,    0001, // h 8
-    96,  144,  28, 23,    0003, // Фиг
-    134, 144,  28, 23,    0213, // НП
-    58,  188,  28, 23,    0026, // g 7
-    96,  188,  28, 23,    0027, // И
-    134, 188,  28, 23,    0202, // СД
-    58,  232,  28, 23,    0204, // f 6
-    96,  232,  28, 23,    0200, // Empty circle
-    134, 232,  28, 23,    0014, // Black circle
-    58,  276,  28, 23,    0007, // e 5
-    96,  276,  28, 23,    0006, // РЗ
-    134, 276,  28, 23,    0073, // Three lines
-    58,  320,  28, 23,    0061, // d 4
-    96,  320,  28, 23,    0062, // N
-    134, 320,  28, 23,    0063, // Arrow back
-    58,  364,  28, 23,    0064, // c 3
-    96,  364,  28, 23,    0065, // Вар
-    134, 364,  28, 23,    0066, // ПХ
-    58,  408,  28, 23,    0067, // b 2
-    96,  408,  28, 23,    0070, // ?
-    134, 408,  28, 23,    0071, // СИ
-    58,  452,  28, 23,    0060, // a 1
-    96,  452,  28, 23,    0055, // Arrow up
-    134, 452,  28, 23,    0057, // Arrow down
+    58,  144,  28, 23,    0130, // h 8
+    96,  144,  28, 23,    0140, // Фиг
+    134, 144,  28, 23,    0150, // НП
+    58,  188,  28, 23,    0131, // g 7
+    96,  188,  28, 23,    0141, // И
+    134, 188,  28, 23,    0151, // СД
+    58,  232,  28, 23,    0132, // f 6
+    96,  232,  28, 23,    0142, // Empty circle
+    134, 232,  28, 23,    0152, // Black circle
+    58,  276,  28, 23,    0133, // e 5
+    96,  276,  28, 23,    0143, // РЗ
+    134, 276,  28, 23,    0153, // Three lines
+    58,  320,  28, 23,    0100, // d 4
+    96,  320,  28, 23,    0110, // N
+    134, 320,  28, 23,    0120, // Arrow back
+    58,  364,  28, 23,    0101, // c 3
+    96,  364,  28, 23,    0111, // Вар
+    134, 364,  28, 23,    0121, // ПХ
+    58,  408,  28, 23,    0102, // b 2
+    96,  408,  28, 23,    0112, // ?
+    134, 408,  28, 23,    0122, // СИ
+    58,  452,  28, 23,    0103, // a 1
+    96,  452,  28, 23,    0113, // Arrow up
+    134, 452,  28, 23,    0123, // Arrow down
 };
 const int m_nKeyboardKeysCount = sizeof(m_arrKeyboardKeys) / sizeof(WORD) / KEYBOARD_KEYS_ARRAY_WIDTH;
 
@@ -170,12 +170,6 @@ LRESULT CALLBACK KeyboardViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPA
             if (keyindex == -1) break;
             BYTE keyscan = (BYTE) m_arrKeyboardKeys[keyindex * KEYBOARD_KEYS_ARRAY_WIDTH + 4];
             if (keyscan == 0) break;
-
-            BOOL okShift = ((fwkeys & MK_SHIFT) != 0);
-            if (okShift && keyscan >= 0100 && keyscan <= 0137)
-                keyscan += 040;
-            else if (okShift && keyscan >= 0060 && keyscan <= 0077)
-                keyscan -= 020;
 
             // Fire keydown event and capture mouse
             Emulator_KeyEvent(keyscan, TRUE);

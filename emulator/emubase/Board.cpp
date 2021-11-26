@@ -88,6 +88,7 @@ void CMotherboard::Reset ()
     // Reset ports
     m_Port164060 = m_Port164074 = 0;
     memset(m_Indicator, 0, sizeof(m_Indicator));
+    memset(m_KeyMatrix, 0, sizeof(m_KeyMatrix));
 
     m_timer = 0177777;
     m_timerdivider = 0;
@@ -349,9 +350,15 @@ bool CMotherboard::SystemFrame()
 }
 
 // Key pressed or released
-void CMotherboard::KeyboardEvent(uint8_t scancode, bool okPressed, bool okAr2)
+void CMotherboard::KeyboardEvent(uint8_t scancode, bool okPressed)
 {
-    //TODO
+    int col = (scancode & 0070) >> 3;  // 0..5
+    int row = scancode & 0003;  // 0..3
+
+    if (okPressed)
+        m_KeyMatrix[col] |= (1 << row);
+    else
+        m_KeyMatrix[col] &= ~(1 << row);
 }
 
 
@@ -526,9 +533,17 @@ uint16_t CMotherboard::GetPortWord(uint16_t address)
         return m_Port164074;
 
     case 0164076:  // ???
-        //DebugLogFormat(_T("READ PORT 164076 PC=%06o, (164060)=%06o\r\n"), m_pCPU->GetInstructionPC(), m_Port164060);
-        //TODO: Отдать состояние клавиатуры
+    {
+        for (int col = 0; col < 6; col++)
+        {
+            if ((m_Port164060 & (1 << col)) != 0)
+            {
+                //DebugLogFormat(_T("READ PORT 164076 PC=%06o, (164060)=%06o, value=%03o\r\n"), m_pCPU->GetInstructionPC(), m_Port164060, m_KeyMatrix[col]);
+                return m_KeyMatrix[col] << 8;
+            }
+        }
         return 0;
+    }
 
     case 0177750:  // ???
         return 0;//STUB
@@ -612,9 +627,9 @@ void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
         break;
 
     case 0164074:  // ???
-        m_Port164074 = word;//TODO: Update indicator state m_Indicator
+        m_Port164074 = word;
         UpdateIndicator((uint8_t)m_Port164060, (uint8_t)word);
-        DebugLogFormat(_T("WRITE PORT 164074 value %06o PC=%06o, (164060)=%06o\r\n"), word, m_pCPU->GetInstructionPC(), m_Port164060);
+        //DebugLogFormat(_T("WRITE PORT 164074 value %06o PC=%06o, (164060)=%06o\r\n"), word, m_pCPU->GetInstructionPC(), m_Port164060);
         break;
 
     case 0164076:  // ???
