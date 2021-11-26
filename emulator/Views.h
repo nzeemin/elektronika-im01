@@ -52,6 +52,7 @@ void KeyboardView_Done();
 void KeyboardView_Create(HWND hwndParent, int x, int y, int width, int height);
 LRESULT CALLBACK KeyboardViewWndProc(HWND, UINT, WPARAM, LPARAM);
 void KeyboardView_Update();
+void KeyboardView_UpdateIndicator();
 
 
 //////////////////////////////////////////////////////////////////////

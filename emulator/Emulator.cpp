@@ -404,6 +404,7 @@ bool Emulator_SystemFrame()
 
     //ScreenView_ScanKeyboard();
     //ScreenView_ProcessKeyboard();
+    KeyboardView_UpdateIndicator();
 
     if (!g_pBoard->SystemFrame())
         return 0;

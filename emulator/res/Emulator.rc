@@ -82,9 +82,6 @@ IDC_APPLICATION MENU
 BEGIN
     POPUP "&File"
     BEGIN
-        MENUITEM "Load State…",                 ID_FILE_LOADSTATE
-        MENUITEM "Save State…",                 ID_FILE_SAVESTATE
-        MENUITEM SEPARATOR
         MENUITEM "Settings General",            ID_FILE_SETTINGS
         MENUITEM "Settings Fonts and Colors",   ID_FILE_SETTINGS_COLORS
         MENUITEM SEPARATOR

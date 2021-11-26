@@ -452,8 +452,10 @@ struct DebugViewPortWatch
 }
 m_DebugViewPorts[] =
 {
-    { 0177660, _T("keyb state") },
-    { 0177662, _T("keyb data") },
+    { 0164004, _T("register R") },
+    { 0164060, _T("register A") },
+    { 0164062, _T("register C") },
+    { 0164074, _T("register D") },
 };
 
 void DebugView_DrawPorts(HDC hdc, const CMotherboard* /*pBoard*/, int x, int y)
@@ -465,12 +467,12 @@ void DebugView_DrawPorts(HDC hdc, const CMotherboard* /*pBoard*/, int x, int y)
     int portsCount = sizeof(m_DebugViewPorts) / sizeof(m_DebugViewPorts[0]);
     for (int i = 0; i < portsCount; i++)
     {
+        y += cyLine;
         const DebugViewPortWatch& watch = m_DebugViewPorts[i];
         uint16_t value = g_pBoard->GetPortView(watch.address);
         DrawOctalValue(hdc, x + 0 * cxChar, y, watch.address);
         DrawOctalValue(hdc, x + 8 * cxChar, y, value);
         TextOut(hdc, x + 16 * cxChar, y, watch.description, _tcslen(watch.description));
-        y += cyLine;
     }
 }
 

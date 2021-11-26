@@ -30,7 +30,7 @@ HWND g_hwndKeyboard = (HWND) INVALID_HANDLE_VALUE;  // Keyboard View window hand
 int m_nKeyboardBitmapLeft = 0;
 int m_nKeyboardBitmapTop = 0;
 BYTE m_nKeyboardKeyPressed = 0;  // BK scan-code for the key pressed, or 0
-BYTE m_arrKeyboardSegmentsData[4] = { 0, 0156, 0354, 0 };
+BYTE m_arrKeyboardSegmentsData[5] = { 0, 0, 0, 0, 0 };
 
 void KeyboardView_OnDraw(HDC hdc);
 int KeyboardView_GetKeyByPoint(int x, int y);
@@ -211,6 +211,26 @@ LRESULT CALLBACK KeyboardViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPA
     return (LRESULT)FALSE;
 }
 
+void KeyboardView_UpdateIndicator()
+{
+    bool needtoredraw = false;
+    for (int i = 0; i < 5; i++)
+    {
+        uint8_t newval = g_pBoard->GetIndicator(4 - i);
+        if (m_arrKeyboardSegmentsData[i] == newval)
+            continue;
+
+        needtoredraw = true;
+        m_arrKeyboardSegmentsData[i] = newval;
+    }
+
+    if (needtoredraw)
+    {
+        RECT rc = { 14, 0, 168, 120 };
+        ::InvalidateRect(g_hwndKeyboard, &rc, FALSE);
+    }
+}
+
 void Keyboard_DrawSegment(HDC hdc, IndicatorSegment* pSegment, int x, int y)
 {
     POINT points[4];
@@ -283,17 +303,27 @@ void KeyboardView_OnDraw(HDC hdc)
     HPEN hpenGreen = ::CreatePen(PS_SOLID, 1, COLOR_KEYBOARD_GREEN);
     hOldBrush = ::SelectObject(hdc, hbrGreen);
     hOldPen = ::SelectObject(hdc, hpenGreen);
-    for (int ind = 0; ind < 4; ind++)
+    for (int ind = 0; ind < 5; ind++)
     {
         BYTE data = m_arrKeyboardSegmentsData[ind];
         int segmentsx = m_nKeyboardBitmapLeft + 54 + ind * 23;
-        if (ind >= 2) segmentsx += 8;
+        if (ind >= 3) segmentsx -= 8;
         int segmentsy = m_nKeyboardBitmapTop + 50;
-        for (int i = 0; i < m_nKeyboardSegmentsCount; i++)
+        if (ind == 2)
         {
-            if ((data & (1 << (i + 1))) == 0)
-                continue;
-            Keyboard_DrawSegment(hdc, m_arrIndicatorSegments + i, segmentsx, segmentsy);
+            if (data & 040)
+                Ellipse(hdc, segmentsx + 2, segmentsy + 8, segmentsx + 2 + 4, segmentsy + 8 + 4);
+            if (data & 020)
+                Ellipse(hdc, segmentsx + 1, segmentsy + 18, segmentsx + 1 + 4, segmentsy + 18 + 4);
+        }
+        else
+        {
+            for (int i = 0; i < m_nKeyboardSegmentsCount; i++)
+            {
+                if ((data & (1 << (i + 1))) == 0)
+                    continue;
+                Keyboard_DrawSegment(hdc, m_arrIndicatorSegments + i, segmentsx, segmentsy);
+            }
         }
     }
     ::SelectObject(hdc, hOldPen);

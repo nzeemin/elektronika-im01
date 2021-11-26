@@ -55,19 +55,6 @@ enum BKConfiguration
 
 
 //////////////////////////////////////////////////////////////////////
-// BK special key codes
-
-#define BK_KEY_REPEAT       0201
-#define BK_KEY_LOWER        0273
-#define BK_KEY_UPPER        0274
-#define BK_KEY_BACKSHIFT    0275
-#define BK_KEY_AR2          0276
-#define BK_KEY_STOP         0277
-
-// Состояния клавиатуры БК - возвращаются из метода GetKeyboardRegister
-#define KEYB_RUS                0x01
-#define KEYB_LAT                0x02
-#define KEYB_LOWERREG           0x10
 
 
 // Sound generator callback function type
@@ -119,8 +106,8 @@ public:  // System control
 public:
     void        ExecuteCPU();  // Execute one CPU instruction
     bool        SystemFrame();  // Do one frame -- use for normal run
+    uint8_t     GetIndicator(int pos);
     void        KeyboardEvent(uint8_t scancode, bool okPressed, bool okAr2);  // Key pressed or released
-    uint16_t    GetKeyboardRegister(void);
     int         GetSoundChanges() const { return m_SoundChanges; }  ///< Sound signal 0 to 1 changes since the beginning of the frame
 public:  // Callbacks
     void        SetSoundGenCallback(SOUNDGENCALLBACK callback);
@@ -142,7 +129,7 @@ public:  // Memory
     // Read word from port for debugger
     uint16_t GetPortView(uint16_t address) const;
     // Read SEL register
-    uint16_t GetSelRegister() const { return m_Port177716; }
+    uint16_t GetSelRegister() const { return 0020000 | 0300; }
     // Get video buffer address
     const uint8_t* GetVideoBuffer();
 private:
@@ -160,11 +147,10 @@ public:  // Saving/loading emulator status
     void        SaveToImage(uint8_t* pImage);
     void        LoadFromImage(const uint8_t* pImage);
 private:  // Ports: implementation
-    uint16_t    m_Port177660;       // Keyboard status register
-    uint16_t    m_Port177662rd;     // Keyboard register
-    uint16_t    m_Port177716;       // System register (read only)
-    uint16_t    m_Port177716mem;    // System register (memory)
-    uint16_t    m_Port177716tap;    // System register (tape)
+    uint16_t    m_Port164060;       // Register A
+    uint16_t    m_Port164074;       // Register D
+    uint8_t     m_Indicator[5 * 8];
+    void        UpdateIndicator(uint8_t mask, uint8_t value);
 private:  // Timer implementation
     uint16_t    m_timer;
     uint16_t    m_timerreload;

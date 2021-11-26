@@ -86,11 +86,8 @@ void CMotherboard::Reset ()
     m_pCPU->Stop();
 
     // Reset ports
-    m_Port177660 = 0100;
-    m_Port177662rd = 0;
-    m_Port177716 = 0020000 | 0300;
-    m_Port177716mem = 0000002;
-    m_Port177716tap = 0200;
+    m_Port164060 = m_Port164074 = 0;
+    memset(m_Indicator, 0, sizeof(m_Indicator));
 
     m_timer = 0177777;
     m_timerdivider = 0;
@@ -186,6 +183,12 @@ void CMotherboard::ResetDevices()
 
 void CMotherboard::Tick50()  // 50 Hz timer
 {
+    for (int i = 0; i < sizeof(m_Indicator); i++)
+    {
+        if (m_Indicator[i] > 0)
+            m_Indicator[i]--;
+    }
+
     //if ((m_Port177662wr & 040000) == 0)
     {
         m_pCPU->TickIRQ2();
@@ -264,6 +267,35 @@ void CMotherboard::DebugTicks()
     m_pCPU->Execute();
 }
 
+void CMotherboard::UpdateIndicator(uint8_t mask, uint8_t value)
+{
+    for (int m = 0; m < 5; m++)
+    {
+        if ((mask & (1 << m)) == 0)
+            continue;
+
+        for (int i = 0; i < 8; i++)
+        {
+            if ((value & (1 << i)) != 0)
+                m_Indicator[m * 8 + i] = 10;
+        }
+    }
+}
+
+uint8_t CMotherboard::GetIndicator(int pos)
+{
+    if (pos < 0 || pos > 4)
+        return 0;
+
+    uint8_t value = 0;
+    for (int i = 0; i < 8; i++)
+    {
+        if (m_Indicator[pos * 8 + i] != 0)
+            value |= (1 << i);
+    }
+    return value;
+}
+
 
 /*
 Каждый фрейм равен 1/25 секунды = 40 мс = 20000 тиков, 1 тик = 2 мкс.
@@ -319,35 +351,7 @@ bool CMotherboard::SystemFrame()
 // Key pressed or released
 void CMotherboard::KeyboardEvent(uint8_t scancode, bool okPressed, bool okAr2)
 {
-    if (scancode == BK_KEY_STOP)
-    {
-        if (okPressed)
-        {
-            m_pCPU->AssertIRQ1();
-        }
-        return;
-    }
-
-    if (!okPressed)  // Key released
-    {
-        m_Port177716 |= 0100;  // Reset "Key pressed" flag in system register
-        m_Port177716 |= 4;  // Set "ready" flag
-        return;
-    }
-
-    m_Port177716 &= ~0100;  // Set "Key pressed" flag in system register
-    m_Port177716 |= 4;  // Set "ready" flag
-
-    if ((m_Port177660 & 0200) == 0)
-    {
-        m_Port177662rd = scancode & 0177;
-        m_Port177660 |= 0200;  // "Key ready" flag in keyboard state register
-        if ((m_Port177660 & 0100) == 0100)  // Keyboard interrupt enabled
-        {
-            uint16_t intvec = ((okAr2 || (scancode & 0200) != 0) ? 0274 : 060);
-            m_pCPU->InterruptVIRQ(1, intvec);
-        }
-    }
+    //TODO
 }
 
 
@@ -505,36 +509,25 @@ uint8_t CMotherboard::GetPortByte(uint16_t address)
 
 uint16_t CMotherboard::GetPortWord(uint16_t address)
 {
-    DebugLogFormat(_T("READ PORT %06o PC=%06o\r\n"), address, m_pCPU->GetInstructionPC());
+    //DebugLogFormat(_T("READ PORT %06o PC=%06o\r\n"), address, m_pCPU->GetInstructionPC());
 
     switch (address)
     {
-    case 0177660:  // Keyboard status register
-        return m_Port177660;
-    case 0177662:  // Keyboard register
-        m_Port177660 &= ~0200;  // Reset "Ready" bit
-        return m_Port177662rd;
-
-    case 0177716:  // System register
-        {
-            uint16_t value = m_Port177716;
-            m_Port177716 &= ~4;  // Reset bit 2
-            return value;
-        }
-
     case 0164004:  // ???
         return 0;//STUB
 
     case 0164060:  // ???
-        return 0;//STUB
+        return m_Port164060;
 
     case 0164072:  // ???
         return 0;
 
     case 0164074:  // ???
-        return 0;
+        return m_Port164074;
 
     case 0164076:  // ???
+        //DebugLogFormat(_T("READ PORT 164076 PC=%06o, (164060)=%06o\r\n"), m_pCPU->GetInstructionPC(), m_Port164060);
+        //TODO: Отдать состояние клавиатуры
         return 0;
 
     case 0177750:  // ???
@@ -557,19 +550,11 @@ uint16_t CMotherboard::GetPortView(uint16_t address) const
 {
     switch (address)
     {
-    case 0177660:  // Keyboard status register
-        return m_Port177660;
-    case 0177662:  // Keyboard data register
-        return m_Port177662rd;
-
-    case 0177716:  // System register
-        return m_Port177716;
-
     case 0164004:  // ???
         return 0;//STUB
 
     case 0164060:  // ???
-        return 0;//STUB
+        return m_Port164060;
 
     case 0164072:  // ???
         return 0;
@@ -612,7 +597,7 @@ void CMotherboard::SetPortByte(uint16_t address, uint8_t byte)
 //void DebugPrintFormat(LPCTSTR pszFormat, ...);  //DEBUG
 void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
 {
-    DebugLogFormat(_T("WRITE PORT %06o value %06o PC=%06o\r\n"), address, word, m_pCPU->GetInstructionPC());
+    //DebugLogFormat(_T("WRITE PORT %06o value %06o PC=%06o\r\n"), address, word, m_pCPU->GetInstructionPC());
 
     switch (address)
     {
@@ -620,12 +605,16 @@ void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
         break;
 
     case 0164060:  // ???
+        m_Port164060 = word;
         break;
 
     case 0164072:  // ???
         break;
 
     case 0164074:  // ???
+        m_Port164074 = word;//TODO: Update indicator state m_Indicator
+        UpdateIndicator((uint8_t)m_Port164060, (uint8_t)word);
+        DebugLogFormat(_T("WRITE PORT 164074 value %06o PC=%06o, (164060)=%06o\r\n"), word, m_pCPU->GetInstructionPC(), m_Port164060);
         break;
 
     case 0164076:  // ???
@@ -662,11 +651,6 @@ void CMotherboard::SaveToImage(uint8_t* pImage)
     uint16_t* pwImage = (uint16_t*) (pImage + 32);
     *pwImage++ = m_Configuration;
     pwImage += 6;  // RESERVED
-    *pwImage++ = m_Port177660;
-    *pwImage++ = m_Port177662rd;
-    *pwImage++ = m_Port177716;
-    *pwImage++ = m_Port177716mem;
-    *pwImage++ = m_Port177716tap;
     pwImage += 3;  // RESERVED
     *pwImage++ = m_timer;
     *pwImage++ = m_timerreload;
@@ -689,11 +673,6 @@ void CMotherboard::LoadFromImage(const uint8_t* pImage)
     uint16_t* pwImage = (uint16_t*) (pImage + 32);
     m_Configuration = *pwImage++;
     pwImage += 6;  // RESERVED
-    m_Port177660 = *pwImage++;
-    m_Port177662rd = *pwImage++;
-    m_Port177716 = *pwImage++;
-    m_Port177716mem = *pwImage++;
-    m_Port177716tap = *pwImage++;
     pwImage += 3;  // RESERVED
     m_timer = *pwImage++;
     m_timerreload = *pwImage++;
@@ -715,19 +694,10 @@ void CMotherboard::LoadFromImage(const uint8_t* pImage)
 
 //////////////////////////////////////////////////////////////////////
 
-uint16_t CMotherboard::GetKeyboardRegister(void)
-{
-    uint16_t res = 0;
-
-    uint16_t mem000042 = GetRAMWord(000042);
-    res |= (mem000042 & 0100000) == 0 ? KEYB_LAT : KEYB_RUS;
-
-    return res;
-}
 
 void CMotherboard::DoSound(void)
 {
-    uint8_t soundValue = (m_Port177716tap & 0100) != 0 ? 0xff : 0;
+    uint8_t soundValue = 0;//TODO
 
     if (m_SoundPrevValue == 0 && soundValue != 0)
         m_SoundChanges++;
