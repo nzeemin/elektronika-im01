@@ -99,7 +99,6 @@ public:  // System control
     uint16_t    GetConfiguration() const { return m_Configuration; }
     void        Reset();  // Reset computer
     void        LoadROM(int bank, const uint8_t* pBuffer);  // Load 8 KB ROM image from the biffer
-    void        LoadRAM(int startbank, const uint8_t* pBuffer, int length);  // Load data into the RAM
     void        Tick50();           // Tick 50 Hz - goes to CPU EVNT line
     void        TimerTick();        // Timer Tick, 31250 Hz, 32uS -- dividers are within timer routine
     void        ResetDevices();     // INIT signal

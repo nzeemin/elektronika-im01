@@ -32,7 +32,7 @@ CMotherboard::CMotherboard ()
     m_CPUbps = nullptr;
 
     // Allocate memory for RAM and ROM
-    m_pRAM = (uint8_t*) ::malloc(64 * 1024);  //::memset(m_pRAM, 0, 128 * 1024);
+    m_pRAM = (uint8_t*) ::malloc(64 * 1024);
     m_pROM = (uint8_t*) ::calloc(64 * 1024, 1);
 
     SetConfiguration(BK_CONF_IM01);  // Default configuration
@@ -55,25 +55,12 @@ void CMotherboard::SetConfiguration(uint16_t conf)
     m_Configuration = conf;
 
     // Define memory map
-    m_MemoryMap = 0xfe;  // By default, 000000-077777 is RAM, 100000-177777 is ROM
-    m_MemoryMapOnOff = 0xff;  // By default, all 8K blocks are valid
+    m_MemoryMap = 0xfe;  // RAM/ROM mapping
+    m_MemoryMapOnOff = 0x07;  // Only lower three 8K blocks are valid
 
     // Clean RAM/ROM
     ::memset(m_pRAM, 0, 64 * 1024);
     ::memset(m_pROM, 0, 64 * 1024);
-
-    //// Pre-fill RAM with "uninitialized" values
-    //uint16_t * pMemory = (uint16_t *) m_pRAM;
-    //uint16_t val = 0;
-    //uint8_t flag = 0;
-    //for (uint32_t i = 0; i < 128 * 1024; i += 2, flag--)
-    //{
-    //    *pMemory = val;  pMemory++;
-    //    if (flag == 192)
-    //        flag = 0;
-    //    else
-    //        val = ~val;
-    //}
 }
 
 void CMotherboard::SetTrace(uint32_t dwTrace)
@@ -81,7 +68,7 @@ void CMotherboard::SetTrace(uint32_t dwTrace)
     m_dwTrace = dwTrace;
 }
 
-void CMotherboard::Reset ()
+void CMotherboard::Reset()
 {
     m_pCPU->Stop();
 
@@ -108,14 +95,6 @@ void CMotherboard::LoadROM(int bank, const uint8_t* pBuffer)
     ::memcpy(m_pROM + 8192 * bank, pBuffer, 8192);
 }
 
-void CMotherboard::LoadRAM(int startbank, const uint8_t* pBuffer, int length)
-{
-    ASSERT(pBuffer != nullptr);
-    ASSERT(startbank >= 0 && startbank < 15);
-    int address = 8192 * startbank;
-    ASSERT(address + length <= 128 * 1024);
-    ::memcpy(m_pRAM + address, pBuffer, length);
-}
 
 // Работа с памятью //////////////////////////////////////////////////
 
@@ -174,7 +153,7 @@ uint8_t CMotherboard::GetROMByte(uint16_t offset) const
 void CMotherboard::ResetDevices()
 {
     // Reset ports
-    //TODO
+    m_Port164060 = m_Port164074 = 0;
 
     // Reset timer
     m_timerflags = 0177400;
@@ -190,10 +169,7 @@ void CMotherboard::Tick50()  // 50 Hz timer
             m_Indicator[i]--;
     }
 
-    //if ((m_Port177662wr & 040000) == 0)
-    {
-        m_pCPU->TickIRQ2();
-    }
+    m_pCPU->TickIRQ2();
 }
 
 void CMotherboard::ExecuteCPU()
@@ -494,16 +470,22 @@ int CMotherboard::TranslateAddress(uint16_t address, bool /*okHaltMode*/, bool /
         return ADDRTYPE_IO;
     }
 
-    int memoryBlock = (address >> 13) & 7;  // 8K block number 0..7
-    bool okValid = (m_MemoryMapOnOff >> memoryBlock) & 1;  // 1 - OK, 0 - deny
-    if (!okValid)
-        return ADDRTYPE_DENY;
-    bool okRom = (m_MemoryMap >> memoryBlock) & 1;  // 1 - ROM, 0 - RAM
-    if (okRom)
-        address -= 0020000;
+    if (address < 0010000)  // 000000..007777 - 4K RAM
+    {
+        *pOffset = address;
+        return ADDRTYPE_RAM;
+    }
 
-    *pOffset = address;
-    return (okRom) ? ADDRTYPE_ROM : ADDRTYPE_RAM;
+    if (address < 0020000)  // 010000..017777 - 4K none
+        return ADDRTYPE_DENY;
+
+    if (address < 0060000)
+    {
+        *pOffset = address - 0020000;
+        return ADDRTYPE_ROM;
+    }
+
+    return ADDRTYPE_DENY;
 }
 
 uint8_t CMotherboard::GetPortByte(uint16_t address)
