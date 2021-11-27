@@ -27,8 +27,6 @@ ELEKTRONIKA-IM01. If not, see <http://www.gnu.org/licenses/>. */
 
 HWND g_hwndKeyboard = (HWND) INVALID_HANDLE_VALUE;  // Keyboard View window handle
 
-int m_nKeyboardBitmapLeft = 0;
-int m_nKeyboardBitmapTop = 0;
 BYTE m_nKeyboardKeyPressed = 0;  // BK scan-code for the key pressed, or 0
 BYTE m_arrKeyboardSegmentsData[5] = { 0, 0, 0, 0, 0 };
 
@@ -39,38 +37,43 @@ void Keyboard_DrawKey(HDC hdc, BYTE keyscan);
 
 //////////////////////////////////////////////////////////////////////
 
-const int KEYBOARD_KEYS_ARRAY_WIDTH = 5;
 
 // Keyboard key mapping to bitmap for BK0010-01 keyboard
-const WORD m_arrKeyboardKeys[] =
+struct KeyboardKey
 {
-    /* x1, y1   w, h      code */
-    58,  144,  28, 23,    0130, // h 8
-    96,  144,  28, 23,    0140, // Фиг
-    134, 144,  28, 23,    0150, // НП
-    58,  188,  28, 23,    0131, // g 7
-    96,  188,  28, 23,    0141, // И
-    134, 188,  28, 23,    0151, // СД
-    58,  232,  28, 23,    0132, // f 6
-    96,  232,  28, 23,    0142, // Empty circle
-    134, 232,  28, 23,    0152, // Black circle
-    58,  276,  28, 23,    0133, // e 5
-    96,  276,  28, 23,    0143, // РЗ
-    134, 276,  28, 23,    0153, // Three lines
-    58,  320,  28, 23,    0100, // d 4
-    96,  320,  28, 23,    0110, // N
-    134, 320,  28, 23,    0120, // Arrow back
-    58,  364,  28, 23,    0101, // c 3
-    96,  364,  28, 23,    0111, // Вар
-    134, 364,  28, 23,    0121, // ПХ
-    58,  408,  28, 23,    0102, // b 2
-    96,  408,  28, 23,    0112, // ?
-    134, 408,  28, 23,    0122, // СИ
-    58,  452,  28, 23,    0103, // a 1
-    96,  452,  28, 23,    0113, // Arrow up
-    134, 452,  28, 23,    0123, // Arrow down
+    int x, y, w, h;
+    uint8_t code;
+    uint8_t status;
+}
+m_arrKeyboardKeys[] =
+{
+    /* x, y      w, h   code */
+    { 58,  144, 28, 23, 0130, 0 }, // h 8
+    { 96,  144, 28, 23, 0340, 0 }, // Фиг
+    { 134, 144, 28, 23, 0150, 0 }, // НП
+    { 58,  188, 28, 23, 0131, 0 }, // g 7
+    { 96,  188, 28, 23, 0141, 0 }, // И
+    { 134, 188, 28, 23, 0151, 0 }, // СД
+    { 58,  232, 28, 23, 0132, 0 }, // f 6
+    { 96,  232, 28, 23, 0142, 0 }, // Empty circle
+    { 134, 232, 28, 23, 0152, 0 }, // Black circle
+    { 58,  276, 28, 23, 0133, 0 }, // e 5
+    { 96,  276, 28, 23, 0143, 0 }, // РЗ
+    { 134, 276, 28, 23, 0353, 0 }, // Level
+    { 58,  320, 28, 23, 0100, 0 }, // d 4
+    { 96,  320, 28, 23, 0110, 0 }, // N
+    { 134, 320, 28, 23, 0120, 0 }, // Arrow back
+    { 58,  364, 28, 23, 0101, 0 }, // c 3
+    { 96,  364, 28, 23, 0111, 0 }, // Вар
+    { 134, 364, 28, 23, 0121, 0 }, // ПХ
+    { 58,  408, 28, 23, 0102, 0 }, // b 2
+    { 96,  408, 28, 23, 0112, 0 }, // ?
+    { 134, 408, 28, 23, 0122, 0 }, // СИ
+    { 58,  452, 28, 23, 0103, 0 }, // a 1
+    { 96,  452, 28, 23, 0113, 0 }, // Arrow up
+    { 134, 452, 28, 23, 0123, 0 }, // Arrow down
 };
-const int m_nKeyboardKeysCount = sizeof(m_arrKeyboardKeys) / sizeof(WORD) / KEYBOARD_KEYS_ARRAY_WIDTH;
+const int m_nKeyboardKeysCount = sizeof(m_arrKeyboardKeys) / sizeof(KeyboardKey);
 
 struct IndicatorSegment
 {
@@ -162,30 +165,49 @@ LRESULT CALLBACK KeyboardViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPA
         return (LRESULT)TRUE;
     case WM_LBUTTONDOWN:
         {
-            int x = LOWORD(lParam);
-            int y = HIWORD(lParam);
-            WORD fwkeys = (WORD)wParam;
+            //WORD fwkeys = (WORD)wParam;
 
-            int keyindex = KeyboardView_GetKeyByPoint(x, y);
+            int keyindex = KeyboardView_GetKeyByPoint(LOWORD(lParam)/*x*/, HIWORD(lParam)/*y*/);
             if (keyindex == -1) break;
-            BYTE keyscan = (BYTE) m_arrKeyboardKeys[keyindex * KEYBOARD_KEYS_ARRAY_WIDTH + 4];
+            BYTE keyscan = m_arrKeyboardKeys[keyindex].code;
             if (keyscan == 0) break;
 
-            // Fire keydown event and capture mouse
-            Emulator_KeyEvent(keyscan, TRUE);
-            ::SetCapture(g_hwndKeyboard);
+            if ((keyscan & 0200) != 0) // shift-like key
+            {
+                // Draw focus frame for the key pressed
+                HDC hdc = ::GetDC(g_hwndKeyboard);
+                Keyboard_DrawKey(hdc, keyscan);
+                VERIFY(::ReleaseDC(g_hwndKeyboard, hdc));
 
-            // Draw focus frame for the key pressed
-            HDC hdc = ::GetDC(g_hwndKeyboard);
-            Keyboard_DrawKey(hdc, keyscan);
-            VERIFY(::ReleaseDC(g_hwndKeyboard, hdc));
+                if (m_arrKeyboardKeys[keyindex].status == 0)
+                {
+                    m_arrKeyboardKeys[keyindex].status = 1;
+                    Emulator_KeyEvent(keyscan, TRUE);
+                }
+                else
+                {
+                    m_arrKeyboardKeys[keyindex].status = 0;
+                    Emulator_KeyEvent(keyscan, FALSE);
+                }
+            }
+            else
+            {
+                Emulator_KeyEvent(keyscan, TRUE);
 
-            // Remember key pressed
-            m_nKeyboardKeyPressed = keyscan;
+                ::SetCapture(g_hwndKeyboard);
+
+                // Draw focus frame for the key pressed
+                HDC hdc = ::GetDC(g_hwndKeyboard);
+                Keyboard_DrawKey(hdc, keyscan);
+                VERIFY(::ReleaseDC(g_hwndKeyboard, hdc));
+
+                // Remember key pressed
+                m_nKeyboardKeyPressed = keyscan;
+            }
         }
         break;
     case WM_LBUTTONUP:
-        if (m_nKeyboardKeyPressed != 0)
+        if (m_nKeyboardKeyPressed != 0)  // we captured the focus
         {
             // Fire keyup event and release mouse
             Emulator_KeyEvent(m_nKeyboardKeyPressed, FALSE);
@@ -300,12 +322,12 @@ void KeyboardView_OnDraw(HDC hdc)
     for (int ind = 0; ind < 5; ind++)
     {
         BYTE data = m_arrKeyboardSegmentsData[ind];
-        int segmentsx = m_nKeyboardBitmapLeft + 54 + ind * 23;
+        int segmentsx = 54 + ind * 23;
         if (ind >= 3) segmentsx -= 8;
-        int segmentsy = m_nKeyboardBitmapTop + 50;
+        int segmentsy = 50;
         if (ind == 2)
         {
-            if (data & 040)
+            if (data & 0200)
                 Ellipse(hdc, segmentsx + 2, segmentsy + 8, segmentsx + 2 + 4, segmentsy + 8 + 4);
             if (data & 020)
                 Ellipse(hdc, segmentsx + 1, segmentsy + 18, segmentsx + 1 + 4, segmentsy + 18 + 4);
@@ -332,10 +354,10 @@ int KeyboardView_GetKeyByPoint(int x, int y)
     for (int i = 0; i < m_nKeyboardKeysCount; i++)
     {
         RECT rcKey;
-        rcKey.left = m_nKeyboardBitmapLeft + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH];
-        rcKey.top = m_nKeyboardBitmapTop + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 1];
-        rcKey.right = rcKey.left + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 2];
-        rcKey.bottom = rcKey.top + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 3];
+        rcKey.left = m_arrKeyboardKeys[i].x;
+        rcKey.top = m_arrKeyboardKeys[i].y;
+        rcKey.right = rcKey.left + m_arrKeyboardKeys[i].w;
+        rcKey.bottom = rcKey.top + m_arrKeyboardKeys[i].h;
 
         if (x >= rcKey.left && x < rcKey.right && y >= rcKey.top && y < rcKey.bottom)
         {
@@ -348,13 +370,13 @@ int KeyboardView_GetKeyByPoint(int x, int y)
 void Keyboard_DrawKey(HDC hdc, BYTE keyscan)
 {
     for (int i = 0; i < m_nKeyboardKeysCount; i++)
-        if (keyscan == m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 4])
+        if (keyscan == m_arrKeyboardKeys[i].code)
         {
             RECT rcKey;
-            rcKey.left = m_nKeyboardBitmapLeft + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH];
-            rcKey.top = m_nKeyboardBitmapTop + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 1];
-            rcKey.right = rcKey.left + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 2];
-            rcKey.bottom = rcKey.top + m_arrKeyboardKeys[i * KEYBOARD_KEYS_ARRAY_WIDTH + 3];
+            rcKey.left = m_arrKeyboardKeys[i].x;
+            rcKey.top = m_arrKeyboardKeys[i].y;
+            rcKey.right = rcKey.left + m_arrKeyboardKeys[i].w;
+            rcKey.bottom = rcKey.top + m_arrKeyboardKeys[i].h;
             ::DrawFocusRect(hdc, &rcKey);
         }
 }
