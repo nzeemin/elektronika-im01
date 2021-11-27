@@ -11,6 +11,5 @@ Release
 ipch
 /emulator/Version.h
 trace.log
-*.lst
 *.txt
 /x-*

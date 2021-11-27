@@ -195,12 +195,12 @@ void ScreenView_OnDraw(HDC hdc)
         }
     }
     ::SelectObject(hdc, hOldBrush);
-    ::DeleteObject(hbrWhite);
-    ::DeleteObject(hbrBlack);
+    VERIFY(::DeleteObject(hbrWhite));
+    VERIFY(::DeleteObject(hbrBlack));
 
     ::SelectObject(hdcMem, hOldBitmap);
-    ::DeleteDC(hdcMem);
-    ::DeleteObject(hBmpPieces);
+    VERIFY(::DeleteDC(hdcMem));
+    VERIFY(::DeleteObject(hBmpPieces));
 
     HFONT hfont = CreateDialogFont();
     HGDIOBJ hOldFont = ::SelectObject(hdc, hfont);
@@ -234,13 +234,12 @@ void ScreenView_OnDraw(HDC hdc)
         ::DrawText(hdc, buffer, 1, &rcText, DT_NOPREFIX | DT_SINGLELINE | DT_CENTER | DT_TOP);
     }
     ::SelectObject(hdc, hOldFont);
-    ::DeleteObject(hfont);
+    VERIFY(::DeleteObject(hfont));
 }
 
 // Зная где лежат данные шахматной доски, отдаем номер фигуры для изображения
 BYTE GetChessFugure(int row, int col)
 {
-    //bool chessconf = (g_nEmulatorConfiguration == EMU_CONF_CHESS1);
     uint16_t addr = 000610 + (7 - row) * 8 + (7 - col);
 
     BYTE figure = g_pBoard->GetRAMByte(0, addr);
@@ -278,7 +277,7 @@ void ScreenView_UpdateScreen()
 
     if (okChanged)
     {
-        HDC hdc = GetDC(g_hwndScreen);
+        HDC hdc = ::GetDC(g_hwndScreen);
         ScreenView_OnDraw(hdc);
         ::ReleaseDC(g_hwndScreen, hdc);
     }

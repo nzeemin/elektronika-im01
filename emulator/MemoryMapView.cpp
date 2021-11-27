@@ -337,7 +337,7 @@ void MemoryMapView_RedrawMap()
 
     MemoryMapView_PrepareBitmap();
 
-    HDC hdc = GetDC(g_hwndMemoryMap);
+    HDC hdc = ::GetDC(g_hwndMemoryMap);
     MemoryMapView_OnDraw(hdc);
     VERIFY(::ReleaseDC(g_hwndMemoryMap, hdc));
 }

@@ -165,8 +165,6 @@ LRESULT CALLBACK KeyboardViewWndProc(HWND hWnd, UINT message, WPARAM wParam, LPA
         return (LRESULT)TRUE;
     case WM_LBUTTONDOWN:
         {
-            //WORD fwkeys = (WORD)wParam;
-
             int keyindex = KeyboardView_GetKeyByPoint(LOWORD(lParam)/*x*/, HIWORD(lParam)/*y*/);
             if (keyindex == -1) break;
             BYTE keyscan = m_arrKeyboardKeys[keyindex].code;
@@ -277,6 +275,7 @@ void KeyboardView_OnDraw(HDC hdc)
     ::MoveToEx(hdc, 1, 0, NULL);
     ::LineTo(hdc, 1, BK_SCREEN_HEIGHT);
     ::SelectObject(hdc, hOldPen);
+    VERIFY(::DeleteObject(hpenDivider));
 
     // Keyboard panel
     HBRUSH hbrBkPanel = ::CreateSolidBrush(COLOR_BK_PANEL);
@@ -298,7 +297,7 @@ void KeyboardView_OnDraw(HDC hdc)
     ::BitBlt(hdc, 26, 127, 141, 372, hdcMem, 0, 0, SRCCOPY);
     ::SelectObject(hdcMem, hOldBitmap);
     ::DeleteDC(hdcMem);
-    ::DeleteObject(hBmpPanel);
+    VERIFY(::DeleteObject(hBmpPanel));
 
     if (m_nKeyboardKeyPressed != 0)
         Keyboard_DrawKey(hdc, m_nKeyboardKeyPressed);
@@ -345,7 +344,8 @@ void KeyboardView_OnDraw(HDC hdc)
     ::SelectObject(hdc, hOldPen);
     ::SelectObject(hdc, hOldBrush);
 
-    ::DeleteObject(hbrGreen);
+    VERIFY(::DeleteObject(hpenGreen));
+    VERIFY(::DeleteObject(hbrGreen));
 }
 
 // Returns: index of key under the cursor position, or -1 if not found

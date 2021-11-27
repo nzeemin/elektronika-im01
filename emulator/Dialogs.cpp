@@ -323,7 +323,7 @@ void SettingsDialog_FillDebugFontCombo(HWND hCombo)
     logfont.lfWeight = FW_NORMAL;
     logfont.lfPitchAndFamily = FIXED_PITCH | FF_DONTCARE;
 
-    HDC hdc = GetDC(NULL);
+    HDC hdc = ::GetDC(NULL);
     EnumFontFamiliesEx(hdc, &logfont, (FONTENUMPROC)SettingsDialog_EnumFontProc, (LPARAM)hCombo, 0);
     VERIFY(::ReleaseDC(NULL, hdc));
 

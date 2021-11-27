@@ -515,17 +515,17 @@ uint16_t CMotherboard::GetPortWord(uint16_t address)
         return m_Port164074;
 
     case 0164076:  // ???
-    {
-        for (int col = 0; col < 6; col++)
         {
-            if ((m_Port164060 & (1 << col)) != 0)
+            for (int col = 0; col < 6; col++)
             {
-                //DebugLogFormat(_T("READ PORT 164076 PC=%06o, (164060)=%06o, value=%03o\r\n"), m_pCPU->GetInstructionPC(), m_Port164060, m_KeyMatrix[col]);
-                return m_KeyMatrix[col] << 8;
+                if ((m_Port164060 & (1 << col)) != 0)
+                {
+                    //DebugLogFormat(_T("READ PORT 164076 PC=%06o, (164060)=%06o, value=%03o\r\n"), m_pCPU->GetInstructionPC(), m_Port164060, m_KeyMatrix[col]);
+                    return m_KeyMatrix[col] << 8;
+                }
             }
+            return 0;
         }
-        return 0;
-    }
 
     case 0177750:  // ???
         return 0;//STUB
