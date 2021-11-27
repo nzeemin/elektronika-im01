@@ -127,17 +127,15 @@ BOOL ScreenView_OnKeyEvent(WPARAM vkey, BOOL okExtKey, BOOL okPressed)
     BYTE keyscan;
     switch (vkey)
     {
-        //case 0x30: // "0"
-    case 0x31: case 0x41: keyscan = 0xf1;  break;  // "1", "A"
-    case 0x32: case 0x42: keyscan = 0xf2;  break;  // "2", "B"
-    case 0x33: case 0x43: keyscan = 0xf3;  break;  // "3", "C"
-    case 0x34: case 0x44: keyscan = 0xf4;  break;  // "4", "D"
-    case 0x35: case 0x45: keyscan = 0xf5;  break;  // "5", "E"
-    case 0x36: case 0x46: keyscan = 0xf6;  break;  // "6", "F"
-    case 0x37: case 0x47: keyscan = 0xf7;  break;  // "7", "G"
-    case 0x38: case 0x48: keyscan = 0xf8;  break;  // "8", "H"
-    case 0x39: keyscan = 0xf9;  break;  // "9"
-    case VK_RETURN: keyscan = 0xdf;  break;  // "ВВ"
+    case 0x31: case 0x41: keyscan = 0103;  break;  // "1", "A"
+    case 0x32: case 0x42: keyscan = 0102;  break;  // "2", "B"
+    case 0x33: case 0x43: keyscan = 0101;  break;  // "3", "C"
+    case 0x34: case 0x44: keyscan = 0100;  break;  // "4", "D"
+    case 0x35: case 0x45: keyscan = 0133;  break;  // "5", "E"
+    case 0x36: case 0x46: keyscan = 0132;  break;  // "6", "F"
+    case 0x37: case 0x47: keyscan = 0131;  break;  // "7", "G"
+    case 0x38: case 0x48: keyscan = 0130;  break;  // "8", "H"
+    case VK_RETURN: keyscan = 0123;  break;  // Arrow down
     default:
         return FALSE;
     }
@@ -254,8 +252,8 @@ BYTE GetChessFugure(int row, int col)
     case 004: figure = 0x04; break;  // конь
     case 006: figure = 0x06; break;  // слон
     case 010: figure = 0x08; break;  // ладья
-    case 012: figure = 0x0c; break;  // ферзь
-    case 014: figure = 0x0a; break;  // король
+    case 012: figure = 0x0a; break;  // ферзь
+    case 014: figure = 0x0c; break;  // король
     default: figure = 0;
     }
     figure |= isblack ? 0x80 : 0;
