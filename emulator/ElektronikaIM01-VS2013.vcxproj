@@ -105,6 +105,10 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Product|Win32'">
+    <PreBuildEvent>
+      <Message>Updating Version.h file...</Message>
+      <Command>"!version.bat"</Command>
+    </PreBuildEvent>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>Use</PrecompiledHeader>
