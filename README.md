@@ -7,6 +7,8 @@ Produced on "Svetlana" (ПАО «Светлана») since year 1986 or so.
 
 This project aim is to emulate the "Электроника ИМ-01" chess computer.
 
+![](docs/emulator-main.png)
+
 ## На русском
 
 "Электроника ИМ-01" — это шахматный компьютер советского периода.
