@@ -694,7 +694,7 @@ void CMotherboard::LoadFromImage(const uint8_t* pImage)
 
 void CMotherboard::DoSound(void)
 {
-    uint8_t soundValue = 0;//TODO
+    uint8_t soundValue = (m_Port164060 & 0200) >> 7;
 
     if (m_SoundPrevValue == 0 && soundValue != 0)
         m_SoundChanges++;
@@ -703,7 +703,7 @@ void CMotherboard::DoSound(void)
     if (m_SoundGenCallback == nullptr)
         return;
 
-    uint16_t value16 = soundValue << 5;
+    uint16_t value16 = (soundValue ? 0xff : 0) << 7;
     (*m_SoundGenCallback)(value16, value16);
 }
 

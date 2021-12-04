@@ -623,6 +623,7 @@ void MainWindow_UpdateMenu()
     case BK_CONF_IM01T: configcmd = ID_CONF_BK0010FOCAL; break;
     }
     CheckMenuRadioItem(hMenu, ID_CONF_BK0010BASIC, ID_CONF_BK0010FOCAL, configcmd, MF_BYCOMMAND);
+    EnableMenuItem(hMenu, ID_CONF_BK0010FOCAL, MF_DISABLED); //TODO
 
     // Debug menu
     BOOL okDebug = Settings_GetDebug();
