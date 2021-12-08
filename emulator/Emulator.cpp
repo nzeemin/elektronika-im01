@@ -53,9 +53,10 @@ void CALLBACK Emulator_SoundGenCallback(unsigned short L, unsigned short R);
 
 //////////////////////////////////////////////////////////////////////
 
-
-const LPCTSTR FILENAME_ROM_148    = _T("000148.rom");
-const LPCTSTR FILENAME_ROM_149    = _T("000149.rom");
+const LPCTSTR FILENAME_ROM_106 = _T("000106.rom");
+const LPCTSTR FILENAME_ROM_107 = _T("000107.rom");
+const LPCTSTR FILENAME_ROM_148 = _T("000148.rom");
+const LPCTSTR FILENAME_ROM_149 = _T("000149.rom");
 
 
 //////////////////////////////////////////////////////////////////////
@@ -149,6 +150,22 @@ bool Emulator_InitConfiguration(BKConfiguration configuration)
     uint8_t buffer[8192];
 
     if (configuration == BK_CONF_IM01)
+    {
+        if (!Emulator_LoadRomFile(FILENAME_ROM_106, buffer, 0, 8192))
+        {
+            AlertWarning(_T("Failed to load ROM file 000106.rom."));
+            return false;
+        }
+        g_pBoard->LoadROM(1, buffer);
+
+        if (!Emulator_LoadRomFile(FILENAME_ROM_107, buffer, 0, 8192))
+        {
+            AlertWarning(_T("Failed to load ROM file 000107.rom."));
+            return false;
+        }
+        g_pBoard->LoadROM(0, buffer);
+    }
+    else if (configuration == BK_CONF_IM01T)
     {
         if (!Emulator_LoadRomFile(FILENAME_ROM_148, buffer, 0, 8192))
         {

@@ -240,7 +240,8 @@ void ScreenView_OnDraw(HDC hdc)
 // Зная где лежат данные шахматной доски, отдаем номер фигуры для изображения
 BYTE GetChessFugure(int row, int col)
 {
-    uint16_t addr = 000610 + (7 - row) * 8 + (7 - col);
+    uint16_t baseaddr = g_nEmulatorConfiguration == BK_CONF_IM01 ? 000660 : 000610;
+    uint16_t addr = baseaddr + (7 - row) * 8 + (7 - col);
 
     BYTE figure = g_pBoard->GetRAMByte(0, addr);
 

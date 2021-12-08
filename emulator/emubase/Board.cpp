@@ -278,13 +278,13 @@ uint8_t CMotherboard::GetIndicator(int pos)
 Каждый фрейм равен 1/25 секунды = 40 мс = 20000 тиков, 1 тик = 2 мкс.
 12 МГц = 1 / 12000000 = 0.83(3) мкс
 В каждый фрейм происходит:
-* 120000 тиков ЦП - 6 раз за тик
+* 180000 тиков ЦП - 9 раз за тик - 4.5 МГц
 * программируемый таймер - на каждый 128-й тик процессора; 42.6(6) мкс либо 32 мкс
 * 2 тика IRQ2 50 Гц, в 0-й и 10000-й тик фрейма
 */
 bool CMotherboard::SystemFrame()
 {
-    const int frameProcTicks = 6;
+    const int frameProcTicks = 9;
     const int audioticks = 20286 / (SOUNDSAMPLERATE / 25);
     m_SoundChanges = 0;
 
@@ -464,26 +464,42 @@ void CMotherboard::SetByte(uint16_t address, bool okHaltMode, uint8_t byte)
 int CMotherboard::TranslateAddress(uint16_t address, bool /*okHaltMode*/, bool /*okExec*/, uint16_t* pOffset) const
 {
     uint16_t portStartAddr = 0164000;
-    if (address >= portStartAddr)  // Port
+    if (address >= portStartAddr ||
+        address >= 0000076 && address <= 0000077)  // Port
     {
         *pOffset = address;
         return ADDRTYPE_IO;
     }
 
-    if (address < 0010000)  // 000000..007777 - 4K RAM
+    if (address < 0004000)  // 000000..003777 - 2K RAM
     {
         *pOffset = address;
         return ADDRTYPE_RAM;
     }
 
-    if (address < 0020000)  // 010000..017777 - 4K none
+    if (address < 0020000)  // 004000..017777 - 6K none
         return ADDRTYPE_DENY;
 
-    if (address < 0060000)
+    if (address < 0060000)  // 020000..057777 - ROM
     {
         *pOffset = address - 0020000;
         return ADDRTYPE_ROM;
     }
+
+    //if (address < 0062000)  // 060000..061777 - RAM
+    //{
+    //    *pOffset = address;
+    //    return ADDRTYPE_RAM;
+    //}
+
+    //if (address < 0064000)
+    //    return ADDRTYPE_DENY;
+
+    //if (address < 0070000)  // 064000..067777 - ROM
+    //{
+    //    *pOffset = address - 0040000;
+    //    return ADDRTYPE_ROM;
+    //}
 
     return ADDRTYPE_DENY;
 }
@@ -502,19 +518,27 @@ uint16_t CMotherboard::GetPortWord(uint16_t address)
 
     switch (address)
     {
+    case 0000076:
+        return 077;
+
     case 0164004:  // ???
+    case 0170004:  // ???
         return 0;//STUB
 
     case 0164060:  // ???
+    case 0170060:  // ???
         return m_Port164060;
 
     case 0164072:  // ???
+    case 0170072:  // ???
         return 0;
 
     case 0164074:  // ???
+    case 0170074:  // ???
         return m_Port164074;
 
     case 0164076:  // ???
+    case 0170076:  // ???
         {
             for (int col = 0; col < 6; col++)
             {
@@ -548,18 +572,23 @@ uint16_t CMotherboard::GetPortView(uint16_t address) const
     switch (address)
     {
     case 0164004:  // ???
+    case 0170004:  // ???
         return 0;//STUB
 
     case 0164060:  // ???
+    case 0170060:  // ???
         return m_Port164060;
 
     case 0164072:  // ???
+    case 0170072:  // ???
         return 0;
 
     case 0164074:  // ???
+    case 0170074:  // ???
         return 0;
 
     case 0164076:  // ???
+    case 0170076:  // ???
         return 0;
 
     case 0177750:  // ???
@@ -598,23 +627,31 @@ void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
 
     switch (address)
     {
+    case 0000076:
+        break;
+
     case 0164004:  // ???
+    case 0170004:  // ???
         break;
 
     case 0164060:  // ???
+    case 0170060:  // ???
         m_Port164060 = word;
         break;
 
     case 0164072:  // ???
+    case 0170072:  // ???
         break;
 
     case 0164074:  // ???
+    case 0170074:  // ???
         m_Port164074 = word;
         UpdateIndicator((uint8_t)m_Port164060, (uint8_t)word);
         //DebugLogFormat(_T("WRITE PORT 164074 value %06o PC=%06o, (164060)=%06o\r\n"), word, m_pCPU->GetInstructionPC(), m_Port164060);
         break;
 
     case 0164076:  // ???
+    case 0170076:  // ???
         break;
 
     case 0177750:  // ???

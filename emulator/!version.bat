@@ -5,11 +5,11 @@ set "YY=%dt:~2,2%" & set "YYYY=%dt:~0,4%" & set "MM=%dt:~4,2%" & set "DD=%dt:~6,
 REM echo Year: %YYYY%
 
 REM set YYYY=2020
-REM git log --tags --simplify-by-decoration --pretty="format:%%cI %%d" | find /c "%YYYY%"
+REM git log --tags --simplify-by-decoration --pretty="format:%%cI %%d" | find /c "release-%YYYY%"
 
 set VERMINOR=
 for /f "tokens=* USEBACKQ" %%a in (
-  `git log --tags --simplify-by-decoration --pretty^=^"format^:%%cI^" ^| find ^/c ^"%YYYY%^"`
+  `git log --tags --simplify-by-decoration --pretty^=^"format^:%%cI %%d^" ^| find ^/c ^"release-%YYYY%^"`
 ) do set VERMINOR=%%a
 REM echo Version minor: %VERMINOR%
 set /A VERMINOR=%VERMINOR%+1
