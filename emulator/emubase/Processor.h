@@ -44,13 +44,13 @@ protected:  // Processor state
     uint16_t    m_psw;              // Processor Status Word (PSW)
     uint16_t    m_R[8];             // Registers (R0..R5, R6=SP, R7=PC)
     bool        m_okStopped;        // "Processor stopped" flag
-    bool        m_userspace;        // Read TRUE if user space is used -- CPU is accessing I/O from HALT mode using user space
-    bool        m_stepmode;         // Read TRUE if it's step mode
+    bool        m_userspace;        // Read true if user space is used -- CPU is accessing I/O from HALT mode using user space
+    bool        m_stepmode;         // Read true if it's step mode
     bool        m_haltpin;          // HALT
     bool        m_waitmode;         // WAIT
 
 protected:  // Current instruction processing
-    uint16_t    m_instruction;      // Curent instruction
+    uint16_t    m_instruction;      // Current instruction
     uint16_t    m_instructionpc;    // Address of the current instruction
     uint8_t     m_regsrc;           // Source register number
     uint8_t     m_methsrc;          // Source address mode
@@ -58,6 +58,7 @@ protected:  // Current instruction processing
     uint8_t     m_regdest;          // Destination register number
     uint8_t     m_methdest;         // Destination address mode
     uint16_t    m_addrdest;         // Destination address
+
 protected:  // Interrupt processing
     bool        m_RPLYrq;           // Hangup interrupt pending
     bool        m_RSVDrq;           // Reserved instruction interrupt pending
@@ -71,8 +72,6 @@ protected:  // Interrupt processing
     bool        m_IOT_rq;           // IOT command interrupt pending
     bool        m_EMT_rq;           // EMT command interrupt pending
     bool        m_TRAPrq;           // TRAP command interrupt pending
-    //bool        m_VIRQrq;           // VIRQ vector interrupt pending
-    //uint16_t    m_VIRQvector;       // VIRQ interrupt vector
     int         m_virqrq;           // VIRQ pending
     uint16_t    m_virq[16];         // VIRQ vector
 protected:
@@ -83,7 +82,7 @@ public:  // Register control
     void        SetPSW(uint16_t word) { m_psw = word; }
     uint16_t    GetReg(int regno) const { return m_R[regno]; }
     void        SetReg(int regno, uint16_t word) { m_R[regno] = word; }
-    uint8_t     GetLReg(int regno) const { return (uint8_t)(m_R[regno] & 0xff); }
+    uint8_t     GetLReg(int regno) const { return static_cast<uint8_t>(m_R[regno] & 0xff); }
     uint16_t    GetSP() const { return m_R[6]; }
     void        SetSP(uint16_t word) { m_R[6] = word; }
     uint16_t    GetPC() const { return m_R[7]; }
@@ -104,7 +103,7 @@ public:  // PSW bits control
 public:  // Processor state
     // "Processor stopped" flag
     bool        IsStopped() const { return m_okStopped; }
-    // HALT flag (TRUE - HALT mode, false - USER mode)
+    // HALT flag (true - HALT mode, false - USER mode)
     bool        IsHaltMode() const
     {
         bool mode = ((m_psw & 0x100) != 0);
@@ -128,16 +127,6 @@ public:  // Saving/loading emulator status (pImage addresses up to 32 bytes)
 protected:  // Implementation
     void        FetchInstruction();      // Read next instruction
     void        TranslateInstruction();  // Execute the instruction
-protected:  // Implementation - instruction processing
-    uint16_t    CalculateOperAddr (int meth, int reg);
-    uint16_t    CalculateOperAddrSrc (int meth, int reg);
-    uint8_t     GetByteSrc();
-    uint8_t     GetByteDest();
-    void        SetByteDest(uint8_t);
-    uint16_t    GetWordSrc();
-    uint16_t    GetWordDest();
-    void        SetWordDest(uint16_t);
-    uint16_t    GetDstWordArgAsBranch();
 protected:  // Implementation - memory access
     uint16_t    GetWordExec(uint16_t address) { return m_pBoard->GetWordExec(address, IsHaltMode()); }
     uint16_t    GetWord(uint16_t address) { return m_pBoard->GetWord(address, IsHaltMode()); }
@@ -159,85 +148,93 @@ protected:  // PSW bits calculations
     bool static CheckSubForCarry(uint8_t a, uint8_t b);
     bool static CheckSubForCarry(uint16_t a, uint16_t b);
 
-protected:  // Implementation - instruction execution
-    // No fields
+protected:
     uint16_t    GetWordAddr(uint8_t meth, uint8_t reg);
     uint16_t    GetByteAddr(uint8_t meth, uint8_t reg);
 
-    void        ExecuteUNKNOWN ();  // Нет такой инструкции - просто вызывается TRAP 10
-    void        ExecuteHALT ();
-    void        ExecuteWAIT ();
-    void        ExecuteRTI ();
-    void        ExecuteBPT ();
-    void        ExecuteIOT ();
-    void        ExecuteRESET ();
-    void        ExecuteSTEP ();
-    void        ExecuteRUN ();
-    void        ExecuteRTT ();
-    void        ExecuteNOP ();
-    void        ExecuteCCC ();
-    void        ExecuteSCC ();
+protected:  // Implementation - instruction execution
+    void        ExecuteUNKNOWN ();  // There is no such instruction -- just call TRAP 10
 
-    // One fiels
-    void        ExecuteRTS ();
-
-    // Two fields
-    void        ExecuteJMP ();
-    void        ExecuteSWAB ();
+    // One field
     void        ExecuteCLR ();
+    void        ExecuteCLRB();
     void        ExecuteCOM ();
+    void        ExecuteCOMB();
     void        ExecuteINC ();
+    void        ExecuteINCB();
     void        ExecuteDEC ();
+    void        ExecuteDECB();
     void        ExecuteNEG ();
-    void        ExecuteADC ();
-    void        ExecuteSBC ();
+    void        ExecuteNEGB();
     void        ExecuteTST ();
-    void        ExecuteTSTB ();
-    void        ExecuteROR ();
-    void        ExecuteROL ();
+    void        ExecuteTSTB();
     void        ExecuteASR ();
+    void        ExecuteASRB();
     void        ExecuteASL ();
-    void        ExecuteMARK ();
+    void        ExecuteASLB();
+    void        ExecuteROR ();
+    void        ExecuteRORB();
+    void        ExecuteROL ();
+    void        ExecuteROLB();
+    void        ExecuteADC ();
+    void        ExecuteADCB();
+    void        ExecuteSBC ();
+    void        ExecuteSBCB();
     void        ExecuteSXT ();
-    void        ExecuteMTPS ();
-    void        ExecuteMFPS ();
-
-    // Branchs & interrupts
+    void        ExecuteSWAB();
+    void        ExecuteMTPS();
+    void        ExecuteMFPS();
+    void        ExecuteMARK();
+    // Two fields
+    void        ExecuteMOV ();
+    void        ExecuteMOVB();
+    void        ExecuteCMP ();
+    void        ExecuteCMPB();
+    void        ExecuteADD ();
+    void        ExecuteSUB ();
+    void        ExecuteBIT ();
+    void        ExecuteBITB();
+    void        ExecuteBIC ();
+    void        ExecuteBICB();
+    void        ExecuteBIS ();
+    void        ExecuteBISB();
+    void        ExecuteXOR ();
+    // Branching
     void        ExecuteBR ();
     void        ExecuteBNE ();
     void        ExecuteBEQ ();
+    void        ExecuteBPL ();
+    void        ExecuteBMI ();
+    void        ExecuteBVC ();
+    void        ExecuteBVS ();
     void        ExecuteBGE ();
     void        ExecuteBLT ();
     void        ExecuteBGT ();
     void        ExecuteBLE ();
-    void        ExecuteBPL ();
-    void        ExecuteBMI ();
     void        ExecuteBHI ();
-    void        ExecuteBLOS ();
-    void        ExecuteBVC ();
-    void        ExecuteBVS ();
-    void        ExecuteBHIS ();
-    void        ExecuteBLO ();
-
-    void        ExecuteEMT ();
-    void        ExecuteTRAP ();
-
-    // Three fields
+    void        ExecuteBLOS();  //BCC == BHIS
+    void        ExecuteBHIS();
+    void        ExecuteBLO ();   //BCS == BLO
+    void        ExecuteJMP ();
     void        ExecuteJSR ();
-    void        ExecuteXOR ();
+    void        ExecuteRTS ();
     void        ExecuteSOB ();
-
-    // Four fields
-    void        ExecuteMOV ();
-    void        ExecuteMOVB ();
-    void        ExecuteCMP ();
-    void        ExecuteCMPB ();
-    void        ExecuteBIT ();
-    void        ExecuteBIC ();
-    void        ExecuteBIS ();
-
-    void        ExecuteADD ();
-    void        ExecuteSUB ();
+    // Interrupts
+    void        ExecuteEMT ();
+    void        ExecuteTRAP();
+    void        ExecuteIOT ();
+    void        ExecuteBPT ();
+    void        ExecuteRTI ();
+    void        ExecuteRTT ();
+    void        ExecuteHALT();
+    void        ExecuteWAIT();
+    void        ExecuteRESET();
+    void        ExecuteSTEP();
+    void        ExecuteRUN ();
+    // Flags
+    void        ExecuteCCC ();
+    void        ExecuteSCC ();
+    void        ExecuteNOP ();
 };
 
 // PSW bits control - implementation
@@ -261,7 +258,7 @@ inline void CProcessor::SetZ (bool bFlag)
 // PSW bits calculations - implementation
 inline bool CProcessor::CheckAddForOverflow (uint8_t a, uint8_t b)
 {
-#if defined(_M_IX86) && defined(_MSC_VER)
+#if defined(_M_IX86) && defined(_MSC_VER) && !defined(_MANAGED)
     bool bOverflow = false;
     _asm
     {
@@ -285,7 +282,7 @@ inline bool CProcessor::CheckAddForOverflow (uint8_t a, uint8_t b)
 }
 inline bool CProcessor::CheckAddForOverflow (uint16_t a, uint16_t b)
 {
-#if defined(_M_IX86) && defined(_MSC_VER)
+#if defined(_M_IX86) && defined(_MSC_VER) && !defined(_MANAGED)
     bool bOverflow = false;
     _asm
     {
@@ -307,11 +304,10 @@ inline bool CProcessor::CheckAddForOverflow (uint16_t a, uint16_t b)
     return ((~a ^ b) & (a ^ sum)) & 0100000;
 #endif
 }
-//void        CProcessor::SetReg(int regno, uint16_t word)
 
 inline bool CProcessor::CheckSubForOverflow (uint8_t a, uint8_t b)
 {
-#if defined(_M_IX86) && defined(_MSC_VER)
+#if defined(_M_IX86) && defined(_MSC_VER) && !defined(_MANAGED)
     bool bOverflow = false;
     _asm
     {
@@ -335,7 +331,7 @@ inline bool CProcessor::CheckSubForOverflow (uint8_t a, uint8_t b)
 }
 inline bool CProcessor::CheckSubForOverflow (uint16_t a, uint16_t b)
 {
-#if defined(_M_IX86) && defined(_MSC_VER)
+#if defined(_M_IX86) && defined(_MSC_VER) && !defined(_MANAGED)
     bool bOverflow = false;
     _asm
     {
@@ -359,23 +355,23 @@ inline bool CProcessor::CheckSubForOverflow (uint16_t a, uint16_t b)
 }
 inline bool CProcessor::CheckAddForCarry (uint8_t a, uint8_t b)
 {
-    uint16_t sum = (uint16_t)a + (uint16_t)b;
+    uint16_t sum = static_cast<uint16_t>(a) + static_cast<uint16_t>(b);
     return (sum & 0xff00) != 0;
 }
 inline bool CProcessor::CheckAddForCarry (uint16_t a, uint16_t b)
 {
-    uint32_t sum = (uint32_t)a + (uint32_t)b;
-    return (uint16_t)((sum >> 16) & 0xffff) != 0;
+    uint32_t sum = static_cast<uint32_t>(a) + static_cast<uint32_t>(b);
+    return static_cast<uint16_t>((sum >> 16) & 0xffff) != 0;
 }
 inline bool CProcessor::CheckSubForCarry (uint8_t a, uint8_t b)
 {
-    uint16_t sum = (uint16_t)a - (uint16_t)b;
+    uint16_t sum = static_cast<uint16_t>(a) - static_cast<uint16_t>(b);
     return (sum & 0xff00) != 0;
 }
 inline bool CProcessor::CheckSubForCarry (uint16_t a, uint16_t b)
 {
-    uint32_t sum = (uint32_t)a - (uint32_t)b;
-    return (uint16_t)((sum >> 16) & 0xffff) != 0;
+    uint32_t sum = static_cast<uint32_t>(a) - static_cast<uint32_t>(b);
+    return static_cast<uint16_t>((sum >> 16) & 0xffff) != 0;
 }
 
 

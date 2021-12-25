@@ -46,12 +46,12 @@ const int TIMING_DS[8]  = { 0, 32, 32, 40, 32, 40, 40, 48 };
 //////////////////////////////////////////////////////////////////////
 
 
-CProcessor::ExecuteMethodRef* CProcessor::m_pExecuteMethodMap = NULL;
+CProcessor::ExecuteMethodRef* CProcessor::m_pExecuteMethodMap = nullptr;
 
 void CProcessor::Init()
 {
-    ASSERT(m_pExecuteMethodMap == NULL);
-    m_pExecuteMethodMap = (CProcessor::ExecuteMethodRef*) ::calloc(65536, sizeof(CProcessor::ExecuteMethodRef));
+    ASSERT(m_pExecuteMethodMap == nullptr);
+    m_pExecuteMethodMap = static_cast<CProcessor::ExecuteMethodRef*>(::calloc(65536, sizeof(CProcessor::ExecuteMethodRef)));
 
     // Сначала заполняем таблицу ссылками на метод ExecuteUNKNOWN, выполняющий TRAP 10
     RegisterMethodRef( 0000000, 0177777, &CProcessor::ExecuteUNKNOWN );
@@ -63,21 +63,19 @@ void CProcessor::Init()
     RegisterMethodRef( 0000004, 0000004, &CProcessor::ExecuteIOT );
     RegisterMethodRef( 0000005, 0000005, &CProcessor::ExecuteRESET );
     RegisterMethodRef( 0000006, 0000006, &CProcessor::ExecuteRTT );
-
+    // MFPT            0000007, 0000007
     RegisterMethodRef( 0000010, 0000013, &CProcessor::ExecuteRUN );  // START
     RegisterMethodRef( 0000014, 0000017, &CProcessor::ExecuteSTEP );
-
+    // RESERVED:       0000020, 0000077
     RegisterMethodRef( 0000100, 0000177, &CProcessor::ExecuteJMP );
     RegisterMethodRef( 0000200, 0000207, &CProcessor::ExecuteRTS );  // RTS / RETURN
-
+    // RESERVED:       0000210, 0000227
+    // SPL             0000230, 0000237
     RegisterMethodRef( 0000240, 0000240, &CProcessor::ExecuteNOP );
     RegisterMethodRef( 0000241, 0000257, &CProcessor::ExecuteCCC );
-
     RegisterMethodRef( 0000260, 0000260, &CProcessor::ExecuteNOP );
     RegisterMethodRef( 0000261, 0000277, &CProcessor::ExecuteSCC );
-
     RegisterMethodRef( 0000300, 0000377, &CProcessor::ExecuteSWAB );
-
     RegisterMethodRef( 0000400, 0000777, &CProcessor::ExecuteBR );
     RegisterMethodRef( 0001000, 0001377, &CProcessor::ExecuteBNE );
     RegisterMethodRef( 0001400, 0001777, &CProcessor::ExecuteBEQ );
@@ -85,9 +83,7 @@ void CProcessor::Init()
     RegisterMethodRef( 0002400, 0002777, &CProcessor::ExecuteBLT );
     RegisterMethodRef( 0003000, 0003377, &CProcessor::ExecuteBGT );
     RegisterMethodRef( 0003400, 0003777, &CProcessor::ExecuteBLE );
-
     RegisterMethodRef( 0004000, 0004777, &CProcessor::ExecuteJSR );  // JSR / CALL
-
     RegisterMethodRef( 0005000, 0005077, &CProcessor::ExecuteCLR );
     RegisterMethodRef( 0005100, 0005177, &CProcessor::ExecuteCOM );
     RegisterMethodRef( 0005200, 0005277, &CProcessor::ExecuteINC );
@@ -100,21 +96,25 @@ void CProcessor::Init()
     RegisterMethodRef( 0006100, 0006177, &CProcessor::ExecuteROL );
     RegisterMethodRef( 0006200, 0006277, &CProcessor::ExecuteASR );
     RegisterMethodRef( 0006300, 0006377, &CProcessor::ExecuteASL );
-
     RegisterMethodRef( 0006400, 0006477, &CProcessor::ExecuteMARK );
+    // MFPI            0006500, 0006577
+    // MTPI            0006600, 0006677
     RegisterMethodRef( 0006700, 0006777, &CProcessor::ExecuteSXT );
-
+    // RESERVED:       0007000, 0007777
     RegisterMethodRef( 0010000, 0017777, &CProcessor::ExecuteMOV );
     RegisterMethodRef( 0020000, 0027777, &CProcessor::ExecuteCMP );
     RegisterMethodRef( 0030000, 0037777, &CProcessor::ExecuteBIT );
     RegisterMethodRef( 0040000, 0047777, &CProcessor::ExecuteBIC );
     RegisterMethodRef( 0050000, 0057777, &CProcessor::ExecuteBIS );
     RegisterMethodRef( 0060000, 0067777, &CProcessor::ExecuteADD );
-
+    // MUL             0070000, 0070777
+    // DIV             0071000, 0071777
+    // ASH             0072000, 0072777
+    // ASHC            0073000, 0073777
     RegisterMethodRef( 0074000, 0074777, &CProcessor::ExecuteXOR );
-
+    // FADD etc.       0075000, 0075777
+    // RESERVED:       0076000, 0076777
     RegisterMethodRef( 0077000, 0077777, &CProcessor::ExecuteSOB );
-
     RegisterMethodRef( 0100000, 0100377, &CProcessor::ExecuteBPL );
     RegisterMethodRef( 0100400, 0100777, &CProcessor::ExecuteBMI );
     RegisterMethodRef( 0101000, 0101377, &CProcessor::ExecuteBHI );
@@ -123,38 +123,36 @@ void CProcessor::Init()
     RegisterMethodRef( 0102400, 0102777, &CProcessor::ExecuteBVS );
     RegisterMethodRef( 0103000, 0103377, &CProcessor::ExecuteBHIS );  // BCC, BHIS
     RegisterMethodRef( 0103400, 0103777, &CProcessor::ExecuteBLO );   // BCS, BLO
-
     RegisterMethodRef( 0104000, 0104377, &CProcessor::ExecuteEMT );
     RegisterMethodRef( 0104400, 0104777, &CProcessor::ExecuteTRAP );
-
-    RegisterMethodRef( 0105000, 0105077, &CProcessor::ExecuteCLR );  // CLRB
-    RegisterMethodRef( 0105100, 0105177, &CProcessor::ExecuteCOM );  // COMB
-    RegisterMethodRef( 0105200, 0105277, &CProcessor::ExecuteINC );  // INCB
-    RegisterMethodRef( 0105300, 0105377, &CProcessor::ExecuteDEC );  // DECB
-    RegisterMethodRef( 0105400, 0105477, &CProcessor::ExecuteNEG );  // NEGB
-    RegisterMethodRef( 0105500, 0105577, &CProcessor::ExecuteADC );  // ADCB
-    RegisterMethodRef( 0105600, 0105677, &CProcessor::ExecuteSBC );  // SBCB
-    RegisterMethodRef( 0105700, 0105777, &CProcessor::ExecuteTSTB );  // TSTB
-    RegisterMethodRef( 0106000, 0106077, &CProcessor::ExecuteROR );  // RORB
-    RegisterMethodRef( 0106100, 0106177, &CProcessor::ExecuteROL );  // ROLB
-    RegisterMethodRef( 0106200, 0106277, &CProcessor::ExecuteASR );  // ASRB
-    RegisterMethodRef( 0106300, 0106377, &CProcessor::ExecuteASL );  // ASLB
-
+    RegisterMethodRef( 0105000, 0105077, &CProcessor::ExecuteCLRB );
+    RegisterMethodRef( 0105100, 0105177, &CProcessor::ExecuteCOMB );
+    RegisterMethodRef( 0105200, 0105277, &CProcessor::ExecuteINCB );
+    RegisterMethodRef( 0105300, 0105377, &CProcessor::ExecuteDECB );
+    RegisterMethodRef( 0105400, 0105477, &CProcessor::ExecuteNEGB );
+    RegisterMethodRef( 0105500, 0105577, &CProcessor::ExecuteADCB );
+    RegisterMethodRef( 0105600, 0105677, &CProcessor::ExecuteSBCB );
+    RegisterMethodRef( 0105700, 0105777, &CProcessor::ExecuteTSTB );
+    RegisterMethodRef( 0106000, 0106077, &CProcessor::ExecuteRORB );
+    RegisterMethodRef( 0106100, 0106177, &CProcessor::ExecuteROLB );
+    RegisterMethodRef( 0106200, 0106277, &CProcessor::ExecuteASRB );
+    RegisterMethodRef( 0106300, 0106377, &CProcessor::ExecuteASLB );
     RegisterMethodRef( 0106400, 0106477, &CProcessor::ExecuteMTPS );
-
+    // MFPD            0106500, 0106577
+    // MTPD            0106600, 0106677
     RegisterMethodRef( 0106700, 0106777, &CProcessor::ExecuteMFPS );
-
-    RegisterMethodRef( 0110000, 0117777, &CProcessor::ExecuteMOVB );  // MOVB
-    RegisterMethodRef( 0120000, 0127777, &CProcessor::ExecuteCMPB );  // CMPB
-    RegisterMethodRef( 0130000, 0137777, &CProcessor::ExecuteBIT );  // BITB
-    RegisterMethodRef( 0140000, 0147777, &CProcessor::ExecuteBIC );  // BICB
-    RegisterMethodRef( 0150000, 0157777, &CProcessor::ExecuteBIS );  // BISB
+    RegisterMethodRef( 0110000, 0117777, &CProcessor::ExecuteMOVB );
+    RegisterMethodRef( 0120000, 0127777, &CProcessor::ExecuteCMPB );
+    RegisterMethodRef( 0130000, 0137777, &CProcessor::ExecuteBITB );
+    RegisterMethodRef( 0140000, 0147777, &CProcessor::ExecuteBICB );
+    RegisterMethodRef( 0150000, 0157777, &CProcessor::ExecuteBISB );
     RegisterMethodRef( 0160000, 0167777, &CProcessor::ExecuteSUB );
+    // FPP             0170000, 0177777
 }
 
 void CProcessor::Done()
 {
-    ::free(m_pExecuteMethodMap);  m_pExecuteMethodMap = NULL;
+    ::free(m_pExecuteMethodMap);  m_pExecuteMethodMap = nullptr;
 }
 
 void CProcessor::RegisterMethodRef(uint16_t start, uint16_t end, CProcessor::ExecuteMethodRef methodref)
@@ -168,7 +166,7 @@ void CProcessor::RegisterMethodRef(uint16_t start, uint16_t end, CProcessor::Exe
 
 CProcessor::CProcessor (CMotherboard* pBoard)
 {
-    ASSERT(pBoard != NULL);
+    ASSERT(pBoard != nullptr);
     m_pBoard = pBoard;
     ::memset(m_R, 0, sizeof(m_R));
     m_psw = 0340;
@@ -181,12 +179,15 @@ CProcessor::CProcessor (CMotherboard* pBoard)
     m_BPT_rq = m_IOT_rq = m_EMT_rq = m_TRAPrq = false;
     //m_VIRQrq = false;
     m_haltpin = false;
-    m_instruction = m_instructionpc = m_addrsrc = m_addrdest = 0;
-    m_regsrc = m_methsrc = m_regdest = m_methdest = 0;
-    m_virqrq = 0;  memset(m_virq, 0, sizeof(m_virq));
+    m_instruction = m_instructionpc = 0;
+    m_regsrc = m_methsrc = 0;
+    m_regdest = m_methdest = 0;
+    m_addrsrc = m_addrdest = 0;
+    m_virqrq = 0;
+    memset(m_virq, 0, sizeof(m_virq));
 }
 
-void CProcessor::Start ()
+void CProcessor::Start()
 {
     m_okStopped = false;
 
@@ -203,7 +204,7 @@ void CProcessor::Start ()
     SetPSW(0340);
     m_internalTick = 1000000;  // Количество тактов на включение процессора (значение с потолка)
 }
-void CProcessor::Stop ()
+void CProcessor::Stop()
 {
     m_okStopped = true;
 
@@ -252,9 +253,9 @@ void CProcessor::Execute()
     {
         for (;;)
         {
-            m_TBITrq = (m_psw & 020);  // T-bit
+            m_TBITrq = (m_psw & 020) != 0;  // T-bit
 
-            // Calculate interrupt vector and mode accoding to priority
+            // Calculate interrupt vector and mode according to priority
             uint16_t intrVector = 0;
             bool currMode = ((m_psw & 0400) != 0);  // Current processor mode: true = HALT mode, false = USER mode
             bool intrMode = false;  // true = HALT mode interrupt, false = USER mode interrupt
@@ -425,250 +426,6 @@ void CProcessor::AssertIRQ1()
 //////////////////////////////////////////////////////////////////////
 
 
-// Вычисление адреса операнда, в зависимости от метода адресации
-//   meth - метод адресации
-//   reg  - номер регистра
-uint16_t CProcessor::CalculateOperAddrSrc (int meth, int reg)
-{
-    uint16_t arg;
-
-    switch (meth)
-    {
-    case 0:  // R0,     PC
-        return GetReg(reg);
-    case 1:  // (R0),   (PC)
-        return GetReg(reg);
-    case 2:  // (R0)+,  #012345
-        //if(reg==7) // is it immediate?
-        //    arg = GetWord(GetReg(reg));
-        //else
-        arg = GetReg(reg);
-        if ((m_instruction & 0100000) && (reg < 6))
-            SetReg(reg, GetReg(reg) + 1);
-        else
-            SetReg(reg, GetReg(reg) + 2);
-        return arg;
-    case 3:  // @(R0)+, @#012345
-        //if(reg==7) //abs index
-        //    arg =  GetWord(GetWord(GetReg(reg))) ;
-        //else
-        arg =  GetWord(GetReg(reg)) ;
-        //if ((m_instruction & 0100000)&&(reg!=7))
-        //    SetReg(reg, GetReg(reg) + 1);
-        //    else
-        SetReg(reg, GetReg(reg) + 2);
-        return arg;
-    case 4:  // -(R0),  -(PC)
-        if ((m_instruction & 0100000) && (reg < 6))
-            SetReg(reg, GetReg(reg) - 1);
-        else
-            SetReg(reg, GetReg(reg) - 2);
-        return GetReg(reg);
-    case 5:  // @-(R0), @-(PC)
-        //    if (m_instruction & 0100000)
-        //        SetReg(reg, GetReg(reg) - 1);
-        //    else
-        SetReg(reg, GetReg(reg) - 2);
-        return  GetWord(GetReg(reg));
-    case 6:  // 345(R0),  345
-        {
-            uint16_t pc = 0;
-            //if(reg==7) //relative direct
-            //    pc = GetWord(GetWordExec( GetPC() ));
-            //else
-            pc = (GetWordExec( GetPC() ));
-
-            SetPC( GetPC() + 2 );
-            arg = (uint16_t)(pc + GetReg(reg));
-            return arg;
-        }
-    case 7:  // @345(R0),@345
-        {
-            uint16_t pc;
-            //if(reg==7) //relative direct
-            //    pc = GetWord(GetWordExec( GetPC() ));
-            //else
-            pc = GetWordExec( GetPC() );
-            SetPC( GetPC() + 2 );
-            arg = ( GetWord(pc + GetReg(reg)) );
-            return arg;
-        }
-    }
-
-    return 0;
-}
-
-uint16_t CProcessor::CalculateOperAddr (int meth, int reg)
-{
-    uint16_t arg;
-    switch (meth)
-    {
-    case 0:  // R0,     PC
-        return (uint16_t)reg;
-    case 1:  // (R0),   (PC)
-        return GetReg(reg);
-    case 2:  // (R0)+,  #012345
-        //if(reg==7) // is it immediate?
-        //    arg = GetWord(GetReg(reg));
-        //else
-        arg = GetReg(reg);
-        if ((m_instruction & 0100000) && (reg < 6))
-            SetReg(reg, GetReg(reg) + 1);
-        else
-            SetReg(reg, GetReg(reg) + 2);
-        return arg;
-    case 3:  // @(R0)+, @#012345
-        //if(reg==7) //abs index
-        //arg =  GetWord(GetWord(GetReg(reg))) ;
-        //else
-        arg =  GetWord(GetReg(reg)) ;
-        //if ((m_instruction & 0100000)&&(reg!=7))
-        //    SetReg(reg, GetReg(reg) + 1);
-        //else
-        SetReg(reg, GetReg(reg) + 2);
-        return arg;
-    case 4:  // -(R0),  -(PC)
-        if ((m_instruction & 0100000) && (reg < 6))
-            SetReg(reg, GetReg(reg) - 1);
-        else
-            SetReg(reg, GetReg(reg) - 2);
-        return GetReg(reg);
-    case 5:  // @-(R0), @-(PC)
-        //if (m_instruction & 0100000)
-        //    SetReg(reg, GetReg(reg) - 1);
-        //else
-        SetReg(reg, GetReg(reg) - 2);
-        return  GetWord(GetReg(reg));
-    case 6:  // 345(R0),  345
-        {
-            uint16_t pc = 0;
-            //if(reg==7) //relative direct
-            // pc = GetWord(GetWordExec( GetPC() ));
-            //else
-            pc = (GetWordExec( GetPC() ));
-
-            SetPC( GetPC() + 2 );
-            arg = (uint16_t)(pc + GetReg(reg));
-            return arg;
-        }
-    case 7:  // @345(R0),@345
-        {
-            uint16_t pc = 0;
-            //if(reg==7)
-            //    pc = GetWord(GetWordExec( GetPC() ));
-            //else
-            pc = GetWordExec( GetPC() );
-            SetPC( GetPC() + 2 );
-            arg = ( GetWord(pc + GetReg(reg)) );
-            return arg;
-        }
-    }
-
-    return 0;
-}
-
-
-uint8_t CProcessor::GetByteSrc ()
-{
-    if (m_methsrc == 0)
-        return (uint8_t) GetReg(m_regsrc) & 0377;
-    else
-        return GetByte( m_addrsrc );
-}
-uint8_t CProcessor::GetByteDest ()
-{
-    if (m_methdest == 0)
-        return (uint8_t) GetReg(m_regdest);
-    else
-        return GetByte( m_addrdest );
-}
-
-void CProcessor::SetByteDest (uint8_t byte)
-{
-    if (m_methdest == 0)
-    {
-        if (byte & 0200)
-            SetReg(m_regdest, 0xff00 | byte);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0xff00) | byte);
-    }
-    else
-        SetByte( m_addrdest, byte );
-}
-
-uint16_t CProcessor::GetWordSrc ()
-{
-    if (m_methsrc == 0)
-    {
-        return GetReg(m_regsrc);
-    }
-    else
-        return GetWord( m_addrsrc );
-}
-uint16_t CProcessor::GetWordDest ()
-{
-    if (m_methdest == 0)
-        return GetReg(m_regdest);
-    else
-        return GetWord( m_addrdest );
-}
-
-void CProcessor::SetWordDest (uint16_t word)
-{
-    if (m_methdest == 0)
-        SetReg(m_regdest, word);
-    else
-        SetWord( (m_addrdest), word );
-}
-
-uint16_t CProcessor::GetDstWordArgAsBranch ()
-{
-    int reg = GetDigit(m_instruction, 0);
-    int meth = GetDigit(m_instruction, 1);
-    uint16_t arg;
-
-    switch (meth)
-    {
-    case 0:  // R0,     PC
-        ASSERT(0);
-        return 0;
-    case 1:  // (R0),   (PC)
-        return GetReg(reg);
-    case 2:  // (R0)+,  #012345
-        arg = GetReg(reg);
-        SetReg(reg, GetReg(reg) + 2);
-        return arg;
-    case 3:  // @(R0)+, @#012345
-        arg = GetWord( GetReg(reg) );
-        SetReg(reg, GetReg(reg) + 2);
-        return arg;
-    case 4:  // -(R0),  -(PC)
-        SetReg(reg, GetReg(reg) - 2);
-        return GetReg(reg);
-    case 5:  // @-(R0), @-(PC)
-        SetReg(reg, GetReg(reg) - 2);
-        return GetWord( GetReg(reg) );
-    case 6:    // 345(R0),  345
-        {
-            uint16_t pc = GetWordExec( GetPC() );
-            SetPC( GetPC() + 2 );
-            return (uint16_t)(pc + GetReg(reg));
-        }
-    case 7:    // @345(R0),@345
-        {
-            uint16_t pc = GetWordExec( GetPC() );
-            SetPC( GetPC() + 2 );
-            return GetWord( (uint16_t)(pc + GetReg(reg)) );
-        }
-    }
-
-    return 0;
-}
-
-
-//////////////////////////////////////////////////////////////////////
-
-
 void CProcessor::FetchInstruction()
 {
     // Считываем очередную инструкцию
@@ -679,20 +436,23 @@ void CProcessor::FetchInstruction()
     SetPC(GetPC() + 2);
 }
 
-void CProcessor::TranslateInstruction ()
+void CProcessor::TranslateInstruction()
 {
+    //if (m_okTrace)
+    //    TraceInstruction(this, m_instructionpc);
+
     // Prepare values to help decode the command
-    m_regdest  = (uint8_t)GetDigit(m_instruction, 0);
-    m_methdest = (uint8_t)GetDigit(m_instruction, 1);
-    m_regsrc   = (uint8_t)GetDigit(m_instruction, 2);
-    m_methsrc  = (uint8_t)GetDigit(m_instruction, 3);
+    m_regdest  = GetDigit(m_instruction, 0);
+    m_methdest = GetDigit(m_instruction, 1);
+    m_regsrc   = GetDigit(m_instruction, 2);
+    m_methsrc  = GetDigit(m_instruction, 3);
 
     // Find command implementation using the command map
     ExecuteMethodRef methodref = m_pExecuteMethodMap[m_instruction];
     (this->*methodref)();  // Call command implementation method
 }
 
-void CProcessor::ExecuteUNKNOWN ()  // Нет такой инструкции - просто вызывается TRAP 10
+void CProcessor::ExecuteUNKNOWN()  // Нет такой инструкции - просто вызывается TRAP 10
 {
 //    DebugPrintFormat(_T(">>Invalid OPCODE = %06o %06o\r\n"), GetPC()-2, m_instruction);
 
@@ -702,11 +462,24 @@ void CProcessor::ExecuteUNKNOWN ()  // Нет такой инструкции - 
 
 // Instruction execution /////////////////////////////////////////////
 
-void CProcessor::ExecuteWAIT ()  // WAIT - Wait for an interrupt
+void CProcessor::ExecuteWAIT()  // WAIT - Wait for an interrupt
 {
     m_waitmode = true;
 
     m_internalTick = TIMING_WAIT;
+}
+
+void CProcessor::ExecuteRUN()
+{
+    m_HALTrq = true;
+
+    //SetPC(m_savepc);
+    //SetPSW(m_savepsw);
+}
+
+void CProcessor::ExecuteHALT()  // HALT - Останов
+{
+    m_HALTrq = true;
 }
 
 void CProcessor::ExecuteSTEP()
@@ -718,120 +491,125 @@ void CProcessor::ExecuteSTEP()
     //SetPSW(m_savepsw);
 }
 
-void CProcessor::ExecuteRUN()
+void CProcessor::ExecuteRTI()  // RTI - Return from Interrupt - Возврат из прерывания
 {
-    m_HALTrq = true;
-
-    //SetPC(m_savepc);
-    //SetPSW(m_savepsw);
-}
-
-void CProcessor::ExecuteHALT ()  // HALT - Останов
-{
-    m_HALTrq = true;
-}
-
-void CProcessor::ExecuteRTI ()  // RTI - Возврат из прерывания
-{
-    uint16_t new_psw;
-    SetReg(7, GetWord( GetSP() ) );  // Pop PC
+    uint16_t word = GetWord(GetSP());
     SetSP( GetSP() + 2 );
+    if (m_RPLYrq) return;
+    SetPC(word);  // Pop PC
 
     m_psw &= 0400;  // Store HALT
-    new_psw = GetWord ( GetSP() );  // Pop PSW --- saving HALT
+    uint16_t new_psw = GetWord(GetSP());  // Pop PSW --- saving HALT
+    SetSP( GetSP() + 2 );
+    if (m_RPLYrq) return;
     if (GetPC() < 0160000)
         SetPSW((new_psw & 0377) | m_psw); // Preserve HALT mode
     else
         SetPSW(new_psw & 0777); //load new mode
 
-    SetSP( GetSP() + 2 );
     m_internalTick = TIMING_RTI;
 }
 
-void CProcessor::ExecuteBPT ()  // BPT - Breakpoint
+void CProcessor::ExecuteRTT()  // RTT - Return from Trace Trap -- Возврат из прерывания
+{
+    uint16_t word = GetWord(GetSP());
+    SetSP( GetSP() + 2 );
+    if (m_RPLYrq) return;
+    SetPC(word);  // Pop PC
+
+    m_psw &= PSW_HALT;  // Store HALT
+    uint16_t new_psw = GetWord(GetSP());  // Pop PSW --- saving HALT
+    SetSP( GetSP() + 2 );
+    if (m_RPLYrq) return;
+    if (GetPC() < 0160000)
+        SetPSW((new_psw & 0377) | m_psw);  // Preserve HALT mode
+    else
+        SetPSW(new_psw & 0777); // Load new mode
+
+    //m_psw |= PSW_T; // set the trap flag ???
+
+    m_internalTick = TIMING_RTI;
+}
+
+void CProcessor::ExecuteBPT()  // BPT - Breakpoint
 {
     m_BPT_rq = true;
     m_internalTick = TIMING_EMT;
 }
 
-void CProcessor::ExecuteIOT ()  // IOT - I/O trap
+void CProcessor::ExecuteIOT()  // IOT - I/O trap
 {
     m_IOT_rq = true;
     m_internalTick = TIMING_EMT;
 }
 
-void CProcessor::ExecuteRESET ()  // Reset input/output devices
+void CProcessor::ExecuteRESET()  // Reset input/output devices
 {
     m_pBoard->ResetDevices();  // INIT signal
 
     m_internalTick = TIMING_WAIT;
 }
 
-void CProcessor::ExecuteRTT ()  // RTT - return from trace trap
-{
-    uint16_t new_psw;
-    SetPC( GetWord( GetSP() ) );  // Pop PC
-    SetSP( GetSP() + 2 );
-
-    m_psw &= PSW_HALT;  // Store HALT
-    new_psw = GetWord ( GetSP() );  // Pop PSW --- saving HALT
-    if (GetPC() < 0160000)
-        SetPSW((new_psw & 0377) | m_psw);  // Preserve HALT mode
-    else
-        SetPSW(new_psw & 0777); // Load new mode
-    SetSP( GetSP() + 2 );
-
-    //m_psw |= PSW_T; // set the trap flag ???
-    m_internalTick = TIMING_RTI;
-}
-
-void CProcessor::ExecuteRTS ()  // RTS - return from subroutine - Возврат из процедуры
+void CProcessor::ExecuteRTS()  // RTS - return from subroutine
 {
     SetPC(GetReg(m_regdest));
-    SetReg(m_regdest, GetWord(GetSP()));
+    uint16_t word = GetWord(GetSP());
     SetSP(GetSP() + 2);
-
+    if (m_RPLYrq) return;
+    SetReg(m_regdest, word);
     m_internalTick = TIMING_RTS;
 }
 
-void CProcessor::ExecuteNOP ()  // NOP - Нет операции
+void CProcessor::ExecuteNOP()  // NOP - No operation
 {
     m_internalTick = TIMING_NOP;
 }
 
-void CProcessor::ExecuteCCC ()
+void CProcessor::ExecuteCCC()
 {
-    SetPSW(GetPSW() &  ~((uint16_t)(m_instruction & 0xff) & 017));
-    m_internalTick = TIMING_REGREG;
-}
-void CProcessor::ExecuteSCC ()
-{
-    SetPSW(GetPSW() | ((uint16_t)(m_instruction & 0xff) & 017));
+    SetPSW(GetPSW() & ~(static_cast<uint16_t>(m_instruction & 0xff) & 017));
+
     m_internalTick = TIMING_REGREG;
 }
 
-void CProcessor::ExecuteJMP ()  // JMP - jump: PC = &d (a-mode > 0)
+void CProcessor::ExecuteSCC()
+{
+    SetPSW(GetPSW() | (static_cast<uint16_t>(m_instruction & 0xff) & 017));
+
+    m_internalTick = TIMING_REGREG;
+}
+
+void CProcessor::ExecuteJMP()  // JMP - jump: PC = &d (a-mode > 0)
 {
     if (m_methdest == 0)  // Неправильный метод адресации
     {
         m_RPLYrq = true;
-
         m_internalTick = TIMING_EMT;
     }
     else
     {
-        SetPC(GetWordAddr(m_methdest, m_regdest));
-
+        uint16_t word = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        SetPC(word);
         m_internalTick = TIMING_DJ[m_methdest];
     }
 }
 
-void CProcessor::ExecuteSWAB ()
+void CProcessor::ExecuteSWAB()
 {
     uint16_t ea = 0;
     uint16_t dst;
 
-    dst = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    if (m_methdest)
+    {
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetReg(m_regdest);
+
     dst = ((dst >> 8) & 0377) | (dst << 8);
 
     if (m_methdest)
@@ -839,569 +617,746 @@ void CProcessor::ExecuteSWAB ()
     else
         SetReg(m_regdest, dst);
 
+    if (m_RPLYrq) return;
+
     SetN((dst & 0200) != 0);
     SetZ(!(dst & 0377));
-    SetV(0);
-    SetC(0);
+    SetV(false);
+    SetC(false);
 
     m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteCLR ()  // CLR
+void CProcessor::ExecuteCLR()
 {
-    if (m_instruction & 0100000)
+    if (m_methdest)
     {
-        SetN(0);
-        SetZ(1);
-        SetV(0);
-        SetC(0);
-
-        if (m_methdest)
-            SetByte(GetByteAddr(m_methdest, m_regdest), 0);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400));
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        uint16_t dst_addr = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        SetWord(dst_addr, 0);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        SetN(0);
-        SetZ(1);
-        SetV(0);
-        SetC(0);
+        SetReg(m_regdest, 0);
 
-        if (m_methdest)
-            SetWord(GetWordAddr(m_methdest, m_regdest), 0);
-        else
-            SetReg(m_regdest, 0);
+    SetN(false);
+    SetZ(true);
+    SetV(false);
+    SetC(false);
 
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteCOM ()  // COM
+void CProcessor::ExecuteCLRB()
 {
-    uint16_t ea = 0;
-    if (m_instruction & 0100000)
+    if (m_methdest)
     {
-        uint8_t dst;
-
-        if (m_methdest)
-            dst = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            dst = GetLReg(m_regdest);
-
-        dst = dst ^ 0377;
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(0);
-        SetC(1);
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        uint16_t dst_addr = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        GetByte(dst_addr);
+        if (m_RPLYrq) return;
+        SetByte(dst_addr, 0);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t dst;
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400));
 
-        dst = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
-        dst = dst ^ 0177777;
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(0);
-        SetC(1);
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
+    SetN(false);
+    SetZ(true);
+    SetV(false);
+    SetC(false);
 
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteINC ()  // INC - Инкремент
+void CProcessor::ExecuteCOM()
 {
     uint16_t ea = 0;
-    if (m_instruction & 0100000)
+    uint16_t dst;
+
+    if (m_methdest)
     {
-        uint8_t dst;
-
-        if (m_methdest)
-            dst = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            dst = GetLReg(m_regdest);
-
-        dst = dst + 1;
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(dst == 0200);
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t dst;
+        dst = GetReg(m_regdest);
 
-        dst = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    dst = dst ^ 0177777;
 
-        dst = dst + 1;
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(dst == 0100000);
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
 
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(false);
+    SetC(true);
 
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteDEC ()  // DEC - Декремент
+void CProcessor::ExecuteCOMB()
 {
     uint16_t ea = 0;
-    if (m_instruction & 0100000)
+    uint8_t dst;
+
+    if (m_methdest)
     {
-        uint8_t dst;
-
-        if (m_methdest)
-            dst = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            dst = GetLReg(m_regdest);
-
-        dst = dst - 1;
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(dst == 0177);
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetByte(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t dst;
+        dst = GetLReg(m_regdest);
 
-        dst = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    dst = dst ^ 0377;
 
-        dst = dst - 1;
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(dst == 077777);
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
 
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(false);
+    SetC(true);
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteNEG ()
+void CProcessor::ExecuteINC()
 {
     uint16_t ea = 0;
+    uint16_t dst;
 
-    if (m_instruction & 0100000)
+    if (m_methdest)
     {
-        uint8_t dst;
-
-        if (m_methdest)
-            dst = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            dst = GetLReg(m_regdest);
-
-        dst = 0 - dst;
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(dst == 0200);
-        SetC(!GetZ());
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t dst;
+        dst = GetReg(m_regdest);
 
-        dst = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    dst = dst + 1;
 
-        dst = 0 - dst;
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
 
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(dst == 0100000);
-        SetC(!GetZ());
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(dst == 0100000);
 
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteADC ()  // ADC{B}
+void CProcessor::ExecuteINCB()
 {
     uint16_t ea = 0;
-    if (m_instruction & 0100000)
+    uint8_t dst;
+
+    if (m_methdest)
     {
-        uint8_t dst;
-
-        if (m_methdest)
-            dst = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            dst = GetLReg(m_regdest);
-
-        dst = dst + (GetC() ? 1 : 0);
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(GetC() && (dst == 0200));
-        SetC(GetC() && GetZ());
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetByte(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t dst;
+        dst = GetLReg(m_regdest);
 
-        dst = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
-        dst = dst + (GetC() ? 1 : 0);
+    dst = dst + 1;
 
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
 
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(dst == 0200);
 
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(GetC() && (dst == 0100000));
-        SetC(GetC() && GetZ());
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteSBC ()  // SBC{B}
+void CProcessor::ExecuteDEC()
 {
     uint16_t ea = 0;
+    uint16_t dst;
 
-    if (m_instruction & 0100000)
+    if (m_methdest)
     {
-        uint8_t dst;
-
-        if (m_methdest)
-            dst = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            dst = GetLReg(m_regdest);
-
-        dst = dst - (GetC() ? 1 : 0);
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(GetC() && (dst == 0177));
-        SetC(GetC() && (dst == 0377));
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t dst;
-        dst = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+        dst = GetReg(m_regdest);
 
-        dst = dst - (GetC() ? 1 : 0);
+    dst = dst - 1;
 
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(GetC() && (dst == 077777));
-        SetC(GetC() && (dst == 0177777));
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
 
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(dst == 077777);
 
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteTST ()  // TST{B} - test
+void CProcessor::ExecuteDECB()
+{
+    uint16_t ea = 0;
+    uint8_t dst;
+
+    if (m_methdest)
+    {
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetByte(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetLReg(m_regdest);
+
+    dst = dst - 1;
+
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(dst == 0177);
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteNEG()
+{
+    uint16_t ea = 0;
+    uint16_t dst;
+
+    if (m_methdest)
+    {
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetReg(m_regdest);
+
+    dst = 0 - dst;
+
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(dst == 0100000);
+    SetC(!GetZ());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteNEGB()
+{
+    uint16_t ea = 0;
+    uint8_t dst;
+
+    if (m_methdest)
+    {
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetByte(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetLReg(m_regdest);
+
+    dst = 0 - dst;
+
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(dst == 0200);
+    SetC(!GetZ());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteADC()
+{
+    uint16_t ea = 0;
+    uint16_t dst;
+
+    if (m_methdest)
+    {
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetReg(m_regdest);
+
+    dst = dst + (GetC() ? 1 : 0);
+
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(GetC() && (dst == 0100000));
+    SetC(GetC() && GetZ());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteADCB()
+{
+    uint16_t ea = 0;
+    uint8_t dst;
+
+    if (m_methdest)
+    {
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetByte(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetLReg(m_regdest);
+
+    dst = dst + (GetC() ? 1 : 0);
+
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(GetC() && (dst == 0200));
+    SetC(GetC() && GetZ());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteSBC()
+{
+    uint16_t ea = 0;
+    uint16_t dst;
+
+    if (m_methdest)
+    {
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetReg(m_regdest);
+
+    dst = dst - (GetC() ? 1 : 0);
+
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(GetC() && (dst == 077777));
+    SetC(GetC() && (dst == 0177777));
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteSBCB()
+{
+    uint16_t ea = 0;
+    uint8_t dst;
+
+    if (m_methdest)
+    {
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetByte(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetLReg(m_regdest);
+
+    dst = dst - (GetC() ? 1 : 0);
+
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(GetC() && (dst == 0177));
+    SetC(GetC() && (dst == 0377));
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteTST()
 {
     uint16_t dst;
-    dst = m_methdest ? GetWord(GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
 
-    SetN(dst >> 15);
+    if (m_methdest)
+    {
+        uint16_t ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetReg(m_regdest);
+
+    SetN((dst >> 15) != 0);
     SetZ(!dst);
-    SetV(0);
-    SetC(0);
+    SetV(false);
+    SetC(false);
 
     m_internalTick = TIMING_REGREG + TIMING_A1[m_methdest];
 }
 
-void CProcessor::ExecuteTSTB ()  // TSTB - test
+void CProcessor::ExecuteTSTB()
 {
     uint8_t dst;
 
     if (m_methdest)
-        dst = GetByte(GetByteAddr(m_methdest, m_regdest));
+    {
+        uint16_t ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetByte(ea);
+        if (m_RPLYrq) return;
+    }
     else
         dst = GetLReg(m_regdest);
 
-    SetN(dst >> 7);
+    SetN((dst >> 7) != 0);
     SetZ(!dst);
-    SetV(0);
-    SetC(0);
+    SetV(false);
+    SetC(false);
 
     m_internalTick = TIMING_REGREG + TIMING_A1[m_methdest];
 }
 
-void CProcessor::ExecuteROR ()  // ROR{B}
+void CProcessor::ExecuteROR()
 {
     uint16_t ea = 0;
+    uint16_t src;
 
-    if (m_instruction & 0100000)
+    if (m_methdest)
     {
-        uint8_t src;
-        uint8_t dst;
-
-        if (m_methdest)
-            src = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            src = GetLReg(m_regdest);
-
-        dst = (src >> 1) | (GetC() ? 0200 : 0);
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetC(src & 1);
-        SetV(GetN() != GetC());
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src = GetWord(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t src;
-        uint16_t dst;
+        src = GetReg(m_regdest);
 
-        src = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    uint16_t dst = (src >> 1) | (GetC() ? 0100000 : 0);
 
-        dst = (src >> 1) | (GetC() ? 0100000 : 0);
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
 
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetC(src & 1);
-        SetV(GetN() != GetC());
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetC(src & 1);
+    SetV(GetN() != GetC());
 
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteROL ()  // ROL{B}
+void CProcessor::ExecuteRORB()
 {
     uint16_t ea = 0;
+    uint8_t src;
 
-    if (m_instruction & 0100000)
+    if (m_methdest)
     {
-        uint8_t src;
-        uint8_t dst;
-
-        if (m_methdest)
-            src = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            src = GetLReg(m_regdest);
-
-        dst = (src << 1) | (GetC() ? 1 : 0);
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetC(src >> 7);
-        SetV(GetN() != GetC());
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src = GetByte(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t src;
-        uint16_t dst;
+        src = GetLReg(m_regdest);
 
-        src = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    uint8_t dst = (src >> 1) | (GetC() ? 0200 : 0);
 
-        dst = (src << 1) | (GetC() ? 1 : 0);
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
 
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetC(src >> 15);
-        SetV(GetN() != GetC());
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetC(src & 1);
+    SetV(GetN() != GetC());
 
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteASR ()  // ASR{B}
+void CProcessor::ExecuteROL()
 {
     uint16_t ea = 0;
-    if (m_instruction & 0100000)
+    uint16_t src;
+
+    if (m_methdest)
     {
-        uint8_t src;
-        uint8_t dst;
-
-        if (m_methdest)
-            src = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            src = GetLReg(m_regdest);
-
-        dst = (src >> 1) | (src & 0200);
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetC(src & 1);
-        SetV(GetN() != GetC());
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetWordAddr((uint8_t)m_methdest, (uint8_t)m_regdest);
+        if (m_RPLYrq) return;
+        src = GetWord(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t src;
-        uint16_t dst;
+        src = GetReg(m_regdest);
 
-        src = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
-        dst = (src >> 1) | (src & 0100000);
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetC(src & 1);
-        SetV(GetN() != GetC());
+    uint16_t dst = (src << 1) | (GetC() ? 1 : 0);
 
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
 
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetC((src >> 15) != 0);
+    SetV(GetN() != GetC());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteASL ()  // ASL{B}
+void CProcessor::ExecuteROLB()
 {
     uint16_t ea = 0;
-    if (m_instruction & 0100000)
+    uint8_t src;
+
+    if (m_methdest)
     {
-        uint8_t src;
-        uint8_t dst;
-
-        if (m_methdest)
-            src = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            src = GetLReg(m_regdest);
-
-        dst = (src << 1) & 0377;
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetC(src >> 7);
-        SetV(GetN() != GetC());
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src = GetByte(ea);
+        if (m_RPLYrq) return;
     }
     else
-    {
-        uint16_t src;
-        uint16_t dst;
-        src = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
-        dst = src << 1;
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetC(src >> 15);
-        SetV(GetN() != GetC());
+        src = GetLReg(m_regdest);
 
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
+    uint8_t dst = (src << 1) | (GetC() ? 1 : 0);
 
-        m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
-    }
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetC((src >> 7) != 0);
+    SetV(GetN() != GetC());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteSXT ()  // SXT - sign-extend
+void CProcessor::ExecuteASR()
+{
+    uint16_t ea = 0;
+    uint16_t src;
+
+    if (m_methdest)
+    {
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src = GetWord(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetReg(m_regdest);
+
+    uint16_t dst = (src >> 1) | (src & 0100000);
+
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetC(src & 1);
+    SetV(GetN() != GetC());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteASRB()
+{
+    uint16_t ea = 0;
+    uint8_t src;
+
+    if (m_methdest)
+    {
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src = GetByte(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetLReg(m_regdest);
+
+    uint8_t dst = (src >> 1) | (src & 0200);
+
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetC(src & 1);
+    SetV(GetN() != GetC());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteASL()
+{
+    uint16_t ea = 0;
+    uint16_t src;
+
+    if (m_methdest)
+    {
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src = GetWord(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetReg(m_regdest);
+
+    uint16_t dst = src << 1;
+
+    if (m_methdest)
+        SetWord(ea, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetC((src >> 15) != 0);
+    SetV(GetN() != GetC());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteASLB()
+{
+    uint16_t ea = 0;
+    uint8_t src;
+
+    if (m_methdest)
+    {
+        ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src = GetByte(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetLReg(m_regdest);
+
+    uint8_t dst = (src << 1) & 0377;
+
+    if (m_methdest)
+        SetByte(ea, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetC((src >> 7) != 0);
+    SetV(GetN() != GetC());
+
+    m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
+}
+
+void CProcessor::ExecuteSXT()  // SXT - sign-extend
 {
     if (m_methdest)
-        SetWord(GetWordAddr(m_methdest, m_regdest), GetN() ? 0177777 : 0);
+    {
+        uint16_t ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        SetWord(ea, GetN() ? 0177777 : 0);
+        if (m_RPLYrq) return;
+    }
     else
         SetReg(m_regdest, GetN() ? 0177777 : 0); //sign extend
 
     SetZ(!GetN());
-    SetV(0);
+    SetV(false);
 
     m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteMTPS ()  // MTPS - move to PS
+void CProcessor::ExecuteMTPS()  // MTPS - move to PS
 {
     uint8_t dst;
-
     if (m_methdest)
-        dst = GetByte(GetByteAddr(m_methdest, m_regdest));
+    {
+        uint16_t ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetByte(ea);
+        if (m_RPLYrq) return;
+    }
     else
         dst = GetLReg(m_regdest);
 
@@ -1418,187 +1373,179 @@ void CProcessor::ExecuteMTPS ()  // MTPS - move to PS
     m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteMFPS ()  // MFPS - move from PS
+void CProcessor::ExecuteMFPS()  // MFPS - move from PS
 {
     uint8_t psw = GetPSW() & 0377;
+
     if (m_methdest)
-        SetByte(GetByteAddr(m_methdest, m_regdest), psw);
+    {
+        uint16_t ea = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        GetByte(ea);
+        if (m_RPLYrq) return;
+        SetByte(ea, psw);
+        if (m_RPLYrq) return;
+    }
     else
-        SetReg(m_regdest, (char)psw); //sign extend
-    SetN(psw & 0200);
+        SetReg(m_regdest, (uint16_t)(signed short)(char)psw); //sign extend
+
+    SetN((psw & 0200) != 0);
     SetZ(psw == 0);
-    SetV(0);
+    SetV(false);
 
     m_internalTick = TIMING_REGREG + TIMING_AB[m_methdest];
 }
 
-void CProcessor::ExecuteBR ()
+void CProcessor::ExecuteBR()
 {
-    SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
+    SetPC(GetPC() + ((short)(char)(uint8_t)(m_instruction & 0xff)) * 2 );
+
     m_internalTick = TIMING_BR;
 }
 
-void CProcessor::ExecuteBNE ()
+void CProcessor::ExecuteBNE()
 {
     if (! GetZ())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBEQ ()
+void CProcessor::ExecuteBEQ()
 {
     if (GetZ())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBGE ()
+void CProcessor::ExecuteBGE()
 {
     if (GetN() == GetV())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBLT ()
+void CProcessor::ExecuteBLT()
 {
     if (GetN() != GetV())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBGT ()
+void CProcessor::ExecuteBGT()
 {
     if (! ((GetN() != GetV()) || GetZ()))
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBLE ()
+void CProcessor::ExecuteBLE()
 {
     if ((GetN() != GetV()) || GetZ())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBPL ()
+void CProcessor::ExecuteBPL()
 {
     if (! GetN())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBMI ()
+void CProcessor::ExecuteBMI()
 {
     if (GetN())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBHI ()
+void CProcessor::ExecuteBHI()
 {
     if (! (GetZ() || GetC()))
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBLOS ()
+void CProcessor::ExecuteBLOS()
 {
     if (GetZ() || GetC())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBVC ()
+void CProcessor::ExecuteBVC()
 {
     if (! GetV())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBVS ()
+void CProcessor::ExecuteBVS()
 {
     if (GetV())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBHIS ()
+void CProcessor::ExecuteBHIS()
 {
     if (! GetC())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteBLO ()
+void CProcessor::ExecuteBLO()
 {
     if (GetC())
-    {
         SetReg(7, GetPC() + ((short)(char)(m_instruction & 0xff)) * 2 );
-    }
 
     m_internalTick = TIMING_BRANCH;
 }
 
-void CProcessor::ExecuteXOR ()  // XOR
+void CProcessor::ExecuteXOR()
 {
-    uint16_t dst;
     uint16_t ea = 0;
+    uint16_t dst;
 
-    dst = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    if (m_methdest)
+    {
+        ea = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        dst = GetWord(ea);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetReg(m_regdest);
+
     dst = dst ^ GetReg(m_regsrc);
-
-    SetN(dst >> 15);
-    SetZ(!dst);
-    SetV(0);
 
     if (m_methdest)
         SetWord(ea, dst);
     else
         SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(false);
 
     m_internalTick = TIMING_REGREG + TIMING_A2[m_methdest];
 }
 
-void CProcessor::ExecuteSOB ()  // SOB - subtract one: R = R - 1 ; if R != 0 : PC = PC - 2*nn
+void CProcessor::ExecuteSOB()  // SOB - subtract one: R = R - 1 ; if R != 0 : PC = PC - 2*nn
 {
     uint16_t dst = GetReg(m_regsrc);
 
@@ -1606,315 +1553,479 @@ void CProcessor::ExecuteSOB ()  // SOB - subtract one: R = R - 1 ; if R != 0 : P
     SetReg(m_regsrc, dst);
 
     if (dst)
-    {
-        SetPC(GetPC() - (m_instruction & (uint16_t)077) * 2 );
-    }
+        SetPC(GetPC() - (m_instruction & static_cast<uint16_t>(077)) * 2 );
 
     m_internalTick = TIMING_SOB;
 }
 
-void CProcessor::ExecuteMOV ()  // MOV only, see also ExecuteMOVB()
+void CProcessor::ExecuteMOV()  // MOV - move
 {
-    uint16_t dst = m_methsrc ? GetWord(GetWordAddr(m_methsrc, m_regsrc)) : GetReg(m_regsrc);
+    uint16_t src_addr, dst_addr;
+    uint16_t dst;
 
-    SetN(dst >> 15);
-    SetZ(!dst);
-    SetV(0);
+    if (m_methsrc)
+    {
+        src_addr = GetWordAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        dst = GetWord(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetReg(m_regsrc);
 
     if (m_methdest)
-        SetWord(GetWordAddr(m_methdest, m_regdest), dst);
+    {
+        dst_addr = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        SetWord(dst_addr, dst);
+        if (m_RPLYrq) return;
+    }
     else
         SetReg(m_regdest, dst);
 
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(false);
+
     m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
 }
 
-void CProcessor::ExecuteMOVB()  // MOVB only, see also ExecuteMOV()
+void CProcessor::ExecuteMOVB()  // MOVB - move byte
 {
-    uint8_t dst = m_methsrc ? GetByte(GetByteAddr(m_methsrc, m_regsrc)) : GetLReg(m_regsrc);
+    uint16_t src_addr, dst_addr;
+    uint8_t dst;
 
-    SetN(dst >> 7);
-    SetZ(!dst);
-    SetV(0);
+    if (m_methsrc)
+    {
+        src_addr = GetByteAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        dst = GetByte(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        dst = GetLReg(m_regsrc);
 
     if (m_methdest)
-        SetByte(GetByteAddr(m_methdest, m_regdest), dst);
+    {
+        dst_addr = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        GetByte(dst_addr);
+        if (m_RPLYrq) return;
+        SetByte(dst_addr, dst);
+        if (m_RPLYrq) return;
+    }
     else
         SetReg(m_regdest, (dst & 0200) ? (0177400 | dst) : dst);
 
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(false);
+
     m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
 }
 
-void CProcessor::ExecuteCMP ()
+void CProcessor::ExecuteCMP()  // CMP - compare
 {
+    uint16_t src_addr, dst_addr;
     uint16_t src;
     uint16_t src2;
-    uint16_t dst;
 
-    src = m_methsrc ? GetWord(GetWordAddr(m_methsrc, m_regsrc)) : GetReg(m_regsrc);
-    src2 = m_methdest ? GetWord(GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    if (m_methsrc)
+    {
+        src_addr = GetWordAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetWord(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetReg(m_regsrc);
 
-    dst = src - src2;
+    if (m_methdest)
+    {
+        dst_addr = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetWord(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetReg(m_regdest);
 
-    SetN(CheckForNegative((uint16_t)(src - src2)));
-    SetZ(CheckForZero((uint16_t)(src - src2)));
+    uint16_t dst = src - src2;
+
+    SetN(CheckForNegative(dst));
+    SetZ(CheckForZero(dst));
     SetV(CheckSubForOverflow(src, src2));
     SetC(CheckSubForCarry(src, src2));
 
     m_internalTick = TIMING_REGREG + TIMING_A1[m_methsrc] + TIMING_CMP[m_methdest];
 }
 
-void CProcessor::ExecuteCMPB ()
+void CProcessor::ExecuteCMPB()  // CMPB - compare byte
 {
+    uint16_t src_addr, dst_addr;
     uint8_t src;
     uint8_t src2;
-    uint8_t dst;
 
     if (m_methsrc)
-        src = GetByte(GetByteAddr(m_methsrc, m_regsrc));
+    {
+        src_addr = GetByteAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetByte(src_addr);
+        if (m_RPLYrq) return;
+    }
     else
         src = GetLReg(m_regsrc);
 
     if (m_methdest)
-        src2 = GetByte(GetByteAddr(m_methdest, m_regdest));
+    {
+        dst_addr = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetByte(dst_addr);
+        if (m_RPLYrq) return;
+    }
     else
         src2 = GetLReg(m_regdest);
 
-    dst = src - src2;
+    uint8_t dst = src - src2;
 
-    SetN(CheckForNegative((uint8_t)(src - src2)));
-    SetZ(CheckForZero((uint8_t)(src - src2)));
+    SetN(CheckForNegative(dst));
+    SetZ(CheckForZero(dst));
     SetV(CheckSubForOverflow(src, src2));
     SetC(CheckSubForCarry(src, src2));
 
     m_internalTick = TIMING_REGREG + TIMING_A1[m_methsrc] + TIMING_CMP[m_methdest];
 }
 
-void CProcessor::ExecuteBIT ()  // BIT{B} - bit test
+void CProcessor::ExecuteBIT()  // BIT - bit test
 {
-    uint16_t ea;
-    if (m_instruction & 0100000)
-    {
-        uint8_t src;
-        uint8_t src2;
-        uint8_t dst;
-
-        if (m_methsrc)
-            src = GetByte(GetByteAddr(m_methsrc, m_regsrc));
-        else
-            src = GetLReg(m_regsrc);
-
-        if (m_methdest)
-            src2 = GetByte(GetByteAddr(m_methdest, m_regdest));
-        else
-            src2 = GetLReg(m_regdest);
-
-        dst = src2 & src;
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(0);
-
-        m_internalTick = TIMING_REGREG + TIMING_A1[m_methsrc] + TIMING_CMP[m_methdest];
-    }
-    else
-    {
-        uint16_t src;
-        uint16_t src2;
-        uint16_t dst;
-
-        src  = m_methsrc  ? GetWord(GetWordAddr(m_methsrc, m_regsrc)) : GetReg(m_regsrc);
-        src2 = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
-
-        dst = src2 & src;
-
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(0);
-
-        m_internalTick = TIMING_REGREG + TIMING_A1[m_methsrc] + TIMING_CMP[m_methdest];
-    }
-}
-
-void CProcessor::ExecuteBIC ()  // BIC{B} - bit clear
-{
-    uint16_t ea = 0;
-    if (m_instruction & 0100000)
-    {
-        uint8_t src;
-        uint8_t src2;
-        uint8_t dst;
-
-        if (m_methsrc)
-            src = GetByte(GetByteAddr(m_methsrc, m_regsrc));
-        else
-            src = GetLReg(m_regsrc);
-
-        if (m_methdest)
-            src2 = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            src2 = GetLReg(m_regdest);
-
-        dst = src2 & (~src);
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(0);
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
-    }
-    else
-    {
-        uint16_t src;
-        uint16_t src2;
-        uint16_t dst;
-
-        src = m_methsrc ? GetWord(GetWordAddr(m_methsrc, m_regsrc)) : GetReg(m_regsrc);
-        src2 = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
-
-        dst = src2 & (~src);
-
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(0);
-
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
-    }
-}
-
-void CProcessor::ExecuteBIS ()  // BIS{B} - bit set
-{
-    uint16_t ea = 0;
-    if (m_instruction & 0100000)
-    {
-        uint8_t src;
-        uint8_t src2;
-        uint8_t dst;
-
-        if (m_methsrc)
-            src = GetByte(GetByteAddr(m_methsrc, m_regsrc));
-        else
-            src = GetLReg(m_regsrc);
-
-        if (m_methdest)
-            src2 = GetByte(ea = GetByteAddr(m_methdest, m_regdest));
-        else
-            src2 = GetLReg(m_regdest);
-
-        dst = src2 | src;
-
-        SetN(dst >> 7);
-        SetZ(!dst);
-        SetV(0);
-
-        if (m_methdest)
-            SetByte(ea, dst);
-        else
-            SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
-    }
-    else
-    {
-        uint16_t src;
-        uint16_t src2;
-        uint16_t dst;
-
-        src = m_methsrc ? GetWord(GetWordAddr(m_methsrc, m_regsrc)) : GetReg(m_regsrc);
-        src2 = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
-
-        dst = src2 | src;
-
-        SetN(dst >> 15);
-        SetZ(!dst);
-        SetV(0);
-
-        if (m_methdest)
-            SetWord(ea, dst);
-        else
-            SetReg(m_regdest, dst);
-
-        m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
-    }
-}
-
-void CProcessor::ExecuteADD ()  // ADD
-{
+    uint16_t src_addr, dst_addr;
     uint16_t src;
     uint16_t src2;
-    signed short dst;
-    signed long dst2;
-    uint16_t ea = 0;
 
-    src = m_methsrc ? GetWord(GetWordAddr(m_methsrc, m_regsrc)) : GetReg(m_regsrc);
-    src2 = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    if (m_methsrc)
+    {
+        src_addr = GetWordAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetWord(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetReg(m_regsrc);
 
-    SetN(CheckForNegative ((uint16_t)(src2 + src)));
-    SetZ(CheckForZero ((uint16_t)(src2 + src)));
+    if (m_methdest)
+    {
+        dst_addr = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetWord(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetReg(m_regdest);
+
+    uint16_t dst = src2 & src;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(false);
+
+    m_internalTick = TIMING_REGREG + TIMING_A1[m_methsrc] + TIMING_CMP[m_methdest];
+}
+
+void CProcessor::ExecuteBITB()  // BITB - bit test on byte
+{
+    uint16_t src_addr, dst_addr;
+    uint8_t src;
+    uint8_t src2;
+
+    if (m_methsrc)
+    {
+        src_addr = GetByteAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetByte(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetLReg(m_regsrc);
+
+    if (m_methdest)
+    {
+        dst_addr = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetByte(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetLReg(m_regdest);
+
+    uint8_t dst = src2 & src;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(false);
+
+    m_internalTick = TIMING_REGREG + TIMING_A1[m_methsrc] + TIMING_CMP[m_methdest];
+}
+
+void CProcessor::ExecuteBIC()  // BIC - bit clear
+{
+    uint16_t src_addr, dst_addr = 0;
+    uint16_t src;
+    uint16_t src2;
+
+    if (m_methsrc)
+    {
+        src_addr = GetWordAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetWord(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetReg(m_regsrc);
+
+    if (m_methdest)
+    {
+        dst_addr = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetWord(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetReg(m_regdest);
+
+    uint16_t dst = src2 & (~src);
+
+    if (m_methdest)
+        SetWord(dst_addr, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(false);
+
+    m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
+}
+
+void CProcessor::ExecuteBICB()  // BICB - bit clear
+{
+    uint16_t src_addr, dst_addr = 0;
+    uint8_t src;
+    uint8_t src2;
+
+    if (m_methsrc)
+    {
+        src_addr = GetByteAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetByte(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetLReg(m_regsrc);
+
+    if (m_methdest)
+    {
+        dst_addr = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetByte(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetLReg(m_regdest);
+
+    uint8_t dst = src2 & (~src);
+
+    if (m_methdest)
+        SetByte(dst_addr, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(false);
+
+    m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
+}
+
+void CProcessor::ExecuteBIS()  // BIS - bit set
+{
+    uint16_t src_addr, dst_addr = 0;
+    uint16_t src;
+    uint16_t src2;
+
+    if (m_methsrc)
+    {
+        src_addr = GetWordAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetWord(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetReg(m_regsrc);
+
+    if (m_methdest)
+    {
+        dst_addr = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetWord(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetReg(m_regdest);
+
+    uint16_t dst = src2 | src;
+
+    if (m_methdest)
+        SetWord(dst_addr, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 15) != 0);
+    SetZ(!dst);
+    SetV(false);
+
+    m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
+}
+
+void CProcessor::ExecuteBISB()  // BISB - bit set on byte
+{
+    uint16_t src_addr, dst_addr = 0;
+    uint8_t src;
+    uint8_t src2;
+
+    if (m_methsrc)
+    {
+        src_addr = GetByteAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetByte(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetLReg(m_regsrc);
+
+    if (m_methdest)
+    {
+        dst_addr = GetByteAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetByte(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetLReg(m_regdest);
+
+    uint8_t dst = src2 | src;
+
+    if (m_methdest)
+        SetByte(dst_addr, dst);
+    else
+        SetReg(m_regdest, (GetReg(m_regdest) & 0177400) | dst);
+    if (m_RPLYrq) return;
+
+    SetN((dst >> 7) != 0);
+    SetZ(!dst);
+    SetV(false);
+
+    m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
+}
+
+void CProcessor::ExecuteADD()
+{
+    uint16_t src_addr, dst_addr = 0;
+    uint16_t src, src2;
+
+    if (m_methsrc)
+    {
+        src_addr = GetWordAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetWord(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetReg(m_regsrc);
+
+    if (m_methdest)
+    {
+        dst_addr = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetWord(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetReg(m_regdest);
+
+    signed short dst = src2 + src;
+
+    if (m_methdest)
+        SetWord(dst_addr, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN(CheckForNegative (static_cast<uint16_t>(src2 + src)));
+    SetZ(CheckForZero (static_cast<uint16_t>(src2 + src)));
     SetV(CheckAddForOverflow (src2, src));
     SetC(CheckAddForCarry (src2, src));
 
-    dst = src2 + src;
-    dst2 = (short)src2 + (short)src;
-
-    if (m_methdest)
-        SetWord(ea, dst);
-    else
-        SetReg(m_regdest, dst);
-
     m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
 }
 
-void CProcessor::ExecuteSUB ()
+void CProcessor::ExecuteSUB()  // SUB
 {
-    uint16_t src;
-    uint16_t src2;
-    uint16_t dst;
-    uint16_t ea = 0;
+    uint16_t src_addr, dst_addr = 0;
+    uint16_t src, src2;
 
-    src = m_methsrc ? GetWord(GetWordAddr(m_methsrc, m_regsrc)) : GetReg(m_regsrc);
-    src2 = m_methdest ? GetWord(ea = GetWordAddr(m_methdest, m_regdest)) : GetReg(m_regdest);
+    if (m_methsrc)
+    {
+        src_addr = GetWordAddr(m_methsrc, m_regsrc);
+        if (m_RPLYrq) return;
+        src = GetWord(src_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src = GetReg(m_regsrc);
 
-    SetN(CheckForNegative ((uint16_t)(src2 - src)));
-    SetZ(CheckForZero ((uint16_t)(src2 - src)));
+    if (m_methdest)
+    {
+        dst_addr = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
+        src2 = GetWord(dst_addr);
+        if (m_RPLYrq) return;
+    }
+    else
+        src2 = GetReg(m_regdest);
+
+    uint16_t dst = src2 - src;
+
+    if (m_methdest)
+        SetWord(dst_addr, dst);
+    else
+        SetReg(m_regdest, dst);
+    if (m_RPLYrq) return;
+
+    SetN(CheckForNegative (static_cast<uint16_t>(src2 - src)));
+    SetZ(CheckForZero (static_cast<uint16_t>(src2 - src)));
     SetV(CheckSubForOverflow (src2, src));
     SetC(CheckSubForCarry (src2, src));
 
-    dst = src2 - src;
-
-    if (m_methdest)
-        SetWord(ea, dst);
-    else
-        SetReg(m_regdest, dst);
-
     m_internalTick = TIMING_REGREG + TIMING_A[m_methsrc] + TIMING_DST[m_methdest];
 }
 
-void CProcessor::ExecuteEMT ()  // EMT - emulator trap
+void CProcessor::ExecuteEMT()  // EMT - emulator trap
 {
     m_EMT_rq = true;
     m_internalTick = TIMING_EMT;
 }
 
-void CProcessor::ExecuteTRAP ()
+void CProcessor::ExecuteTRAP()
 {
     m_TRAPrq = true;
     m_internalTick = TIMING_EMT;
 }
 
-void CProcessor::ExecuteJSR ()  // JSR - Jump subroutine: *--SP = R; R = PC; PC = &d (a-mode > 0)
+void CProcessor::ExecuteJSR()  // JSR - jump subroutine: *--SP = R; R = PC; PC = &d (a-mode > 0)
 {
-    //int meth = GetDigit(m_instruction, DST + 1);
     if (m_methdest == 0)
     {
         // Неправильный метод адресации
@@ -1923,31 +2034,30 @@ void CProcessor::ExecuteJSR ()  // JSR - Jump subroutine: *--SP = R; R = PC; PC 
     }
     else
     {
-        uint16_t dst;
-        //uint16_t pc = GetDstWordArgAsBranch();
-        dst = GetWordAddr(m_methdest, m_regdest);
+        uint16_t dst = GetWordAddr(m_methdest, m_regdest);
+        if (m_RPLYrq) return;
 
         SetSP( GetSP() - 2 );
-
         SetWord( GetSP(), GetReg(m_regsrc) );
-
         SetReg(m_regsrc, GetPC());
-
         SetPC(dst);
+        if (m_RPLYrq) return;
 
         m_internalTick = TIMING_DS[m_methdest];
     }
 }
 
-void CProcessor::ExecuteMARK ()  // MARK
+void CProcessor::ExecuteMARK()  // MARK
 {
     SetSP( GetPC() + (m_instruction & 0x003F) * 2 );
     SetPC( GetReg(5) );
     SetReg(5, GetWord( GetSP() ));
     SetSP( GetSP() + 2 );
+    if (m_RPLYrq) return;
 
     m_internalTick = TIMING_MARK;
 }
+
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -1959,7 +2069,7 @@ void CProcessor::ExecuteMARK ()  // MARK
 
 void CProcessor::SaveToImage(uint8_t* pImage)
 {
-    uint16_t* pwImage = (uint16_t*) pImage;
+    uint16_t* pwImage = reinterpret_cast<uint16_t*>(pImage);
     // PSW
     *pwImage++ = m_psw;
     // Registers R0..R7
@@ -1974,7 +2084,7 @@ void CProcessor::SaveToImage(uint8_t* pImage)
 
 void CProcessor::LoadFromImage(const uint8_t* pImage)
 {
-    uint16_t* pwImage = (uint16_t*) pImage;
+    const uint16_t* pwImage = reinterpret_cast<const uint16_t*>(pImage);
     // PSW
     m_psw = *pwImage++;
     // Registers R0..R7
@@ -1988,62 +2098,62 @@ void CProcessor::LoadFromImage(const uint8_t* pImage)
 
 uint16_t CProcessor::GetWordAddr (uint8_t meth, uint8_t reg)
 {
-    uint16_t addr;
-
-    addr = 0;
-
     switch (meth)
     {
     case 1:   //(R)
-        addr = GetReg(reg);
-        break;
+        return GetReg(reg);
     case 2:   //(R)+
-        addr = GetReg(reg);
-        SetReg(reg, addr + 2);
-        break;
+        {
+            uint16_t addr = GetReg(reg);
+            SetReg(reg, addr + 2);
+            return addr;
+        }
     case 3:  //@(R)+
-        addr = GetReg(reg);
-        SetReg(reg, addr + 2);
-        addr = GetWord(addr);
-        break;
+        {
+            uint16_t addr = GetReg(reg);
+            SetReg(reg, addr + 2);
+            return GetWord(addr);
+        }
     case 4: //-(R)
         SetReg(reg, GetReg(reg) - 2);
-        addr = GetReg(reg);
-        break;
+        return GetReg(reg);
     case 5: //@-(R)
-        SetReg(reg, GetReg(reg) - 2);
-        addr = GetReg(reg);
-        addr = GetWord(addr);
-        break;
+        {
+            SetReg(reg, GetReg(reg) - 2);
+            uint16_t addr = GetReg(reg);
+            return GetWord(addr);
+        }
     case 6: //d(R)
-        addr = GetWord(GetPC());
-        SetPC(GetPC() + 2);
-        addr = GetReg(reg) + addr;
-        break;
+        {
+            uint16_t addr = GetWord(GetPC());
+            SetPC(GetPC() + 2);
+            return GetReg(reg) + addr;
+        }
     case 7: //@d(r)
-        addr = GetWord(GetPC());
-        SetPC(GetPC() + 2);
-        addr = GetReg(reg) + addr;
-        addr = GetWord(addr);
-        break;
+        {
+            uint16_t addr = GetWord(GetPC());
+            SetPC(GetPC() + 2);
+            addr = GetReg(reg) + addr;
+            if (!m_RPLYrq)
+                return GetWord(addr);
+            return addr;
+        }
     }
-    return addr;
+    return 0;
 }
 
 uint16_t CProcessor::GetByteAddr (uint8_t meth, uint8_t reg)
 {
-    uint16_t addr, delta;
+    uint16_t addr = 0;
 
-    addr = 0;
     switch (meth)
     {
     case 1:
         addr = GetReg(reg);
         break;
     case 2:
-        delta = 1 + (reg >= 6);
         addr = GetReg(reg);
-        SetReg(reg, addr + delta);
+        SetReg(reg, addr + (reg < 6 ? 1 : 2));
         break;
     case 3:
         addr = GetReg(reg);
@@ -2051,8 +2161,7 @@ uint16_t CProcessor::GetByteAddr (uint8_t meth, uint8_t reg)
         addr = GetWord(addr);
         break;
     case 4:
-        delta = 1 + (reg >= 6);
-        SetReg(reg, GetReg(reg) - delta);
+        SetReg(reg, GetReg(reg) - (reg < 6 ? 1 : 2));
         addr = GetReg(reg);
         break;
     case 5:
@@ -2069,7 +2178,7 @@ uint16_t CProcessor::GetByteAddr (uint8_t meth, uint8_t reg)
         addr = GetWord(GetPC());
         SetPC(GetPC() + 2);
         addr = GetReg(reg) + addr;
-        addr = GetWord(addr);
+        if (!m_RPLYrq) addr = GetWord(addr);
         break;
     }
 

@@ -464,8 +464,7 @@ void CMotherboard::SetByte(uint16_t address, bool okHaltMode, uint8_t byte)
 int CMotherboard::TranslateAddress(uint16_t address, bool /*okHaltMode*/, bool /*okExec*/, uint16_t* pOffset) const
 {
     uint16_t portStartAddr = 0164000;
-    if (address >= portStartAddr ||
-        address >= 0000076 && address <= 0000077)  // Port
+    if (address >= portStartAddr)  // Port
     {
         *pOffset = address;
         return ADDRTYPE_IO;
@@ -518,9 +517,6 @@ uint16_t CMotherboard::GetPortWord(uint16_t address)
 
     switch (address)
     {
-    case 0000076:
-        return 077;
-
     case 0164004:  // ???
     case 0170004:  // ???
         return 0;//STUB
@@ -627,9 +623,6 @@ void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
 
     switch (address)
     {
-    case 0000076:
-        break;
-
     case 0164004:  // ???
     case 0170004:  // ???
         break;
