@@ -56,9 +56,9 @@
 #define ID_EMULATOR_REALSPEED           32801
 #define ID_EMULATOR_SPEED200            32802
 #define ID_EMULATOR_CONF                32803
-#define ID_CONF_BK0010MONIT             32812
 #define ID_CONF_BK0010BASIC             32813
 #define ID_CONF_BK0010FOCAL             32814
+#define ID_CONF_IM05                    32815
 #define ID_EMULATOR_SOUND               32831
 #define ID_SCREEN                       32846
 #define ID_DEBUG                        32881

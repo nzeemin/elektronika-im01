@@ -25,6 +25,7 @@ enum BKConfiguration
 {
     BK_CONF_IM01  = 1,
     BK_CONF_IM01T = 2,
+    BK_CONF_IM05  = 5,
 };
 
 

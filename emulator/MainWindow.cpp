@@ -619,10 +619,11 @@ void MainWindow_UpdateMenu()
     UINT configcmd = 0;
     switch (g_nEmulatorConfiguration)
     {
-    case BK_CONF_IM01: configcmd = ID_CONF_BK0010BASIC; break;
+    case BK_CONF_IM01:  configcmd = ID_CONF_BK0010BASIC; break;
     case BK_CONF_IM01T: configcmd = ID_CONF_BK0010FOCAL; break;
+    case BK_CONF_IM05:  configcmd = ID_CONF_IM05;  break;
     }
-    CheckMenuRadioItem(hMenu, ID_CONF_BK0010BASIC, ID_CONF_BK0010FOCAL, configcmd, MF_BYCOMMAND);
+    CheckMenuRadioItem(hMenu, ID_CONF_BK0010BASIC, ID_CONF_IM05, configcmd, MF_BYCOMMAND);
 
     // Debug menu
     BOOL okDebug = Settings_GetDebug();
@@ -696,6 +697,9 @@ bool MainWindow_DoCommand(int commandId)
         break;
     case ID_CONF_BK0010FOCAL:
         MainWindow_DoEmulatorConf(BK_CONF_IM01T);
+        break;
+    case ID_CONF_IM05:
+        MainWindow_DoEmulatorConf(BK_CONF_IM05);
         break;
     case ID_VIEW_DEBUG:
         MainWindow_DoViewDebug();

@@ -57,6 +57,9 @@ const LPCTSTR FILENAME_ROM_106 = _T("000106.rom");
 const LPCTSTR FILENAME_ROM_107 = _T("000107.rom");
 const LPCTSTR FILENAME_ROM_148 = _T("000148.rom");
 const LPCTSTR FILENAME_ROM_149 = _T("000149.rom");
+const LPCTSTR FILENAME_ROM_205 = _T("000205.rom");
+const LPCTSTR FILENAME_ROM_206 = _T("000206.rom");
+const LPCTSTR FILENAME_ROM_207 = _T("000207.rom");
 
 
 //////////////////////////////////////////////////////////////////////
@@ -180,6 +183,29 @@ bool Emulator_InitConfiguration(BKConfiguration configuration)
             return false;
         }
         g_pBoard->LoadROM(1, buffer);
+    }
+    else if (configuration == BK_CONF_IM05)
+    {
+        if (!Emulator_LoadRomFile(FILENAME_ROM_205, buffer, 0, 8192))
+        {
+            AlertWarning(_T("Failed to load ROM file 000205.rom."));
+            return false;
+        }
+        g_pBoard->LoadROM(0, buffer);
+
+        if (!Emulator_LoadRomFile(FILENAME_ROM_206, buffer, 0, 8192))
+        {
+            AlertWarning(_T("Failed to load ROM file 000206.rom."));
+            return false;
+        }
+        g_pBoard->LoadROM(1, buffer);
+
+        if (!Emulator_LoadRomFile(FILENAME_ROM_207, buffer, 0, 8192))
+        {
+            AlertWarning(_T("Failed to load ROM file 000207.rom."));
+            return false;
+        }
+        g_pBoard->LoadROM(2, buffer);
     }
 
     g_nEmulatorConfiguration = configuration;

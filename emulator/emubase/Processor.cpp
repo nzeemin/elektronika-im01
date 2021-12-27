@@ -454,7 +454,7 @@ void CProcessor::TranslateInstruction()
 
 void CProcessor::ExecuteUNKNOWN()  // Нет такой инструкции - просто вызывается TRAP 10
 {
-//    DebugPrintFormat(_T(">>Invalid OPCODE = %06o %06o\r\n"), GetPC()-2, m_instruction);
+    DebugPrintFormat(_T(">>Invalid OPCODE = %06o %06o\r\n"), GetPC() - 2, m_instruction);
 
     m_RSVDrq = true;
 }

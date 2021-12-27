@@ -110,6 +110,7 @@ BEGIN
     BEGIN
         MENUITEM "IM-01",                       ID_CONF_BK0010BASIC
         MENUITEM "IM-01T",                      ID_CONF_BK0010FOCAL
+        MENUITEM "IM-05",                       ID_CONF_IM05
     END
     POPUP "Debug"
     BEGIN

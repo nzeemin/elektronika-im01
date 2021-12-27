@@ -330,6 +330,8 @@ void CMotherboard::KeyboardEvent(uint8_t scancode, bool okPressed)
 {
     int col = (scancode & 0070) >> 3;  // 0..5
     int row = scancode & 0003;  // 0..3
+    if (m_Configuration == BK_CONF_IM05)
+        row = 3 - row;
 
     if (okPressed)
         m_KeyMatrix[col] |= (1 << row);
@@ -464,7 +466,8 @@ void CMotherboard::SetByte(uint16_t address, bool okHaltMode, uint8_t byte)
 int CMotherboard::TranslateAddress(uint16_t address, bool /*okHaltMode*/, bool /*okExec*/, uint16_t* pOffset) const
 {
     uint16_t portStartAddr = 0164000;
-    if (address >= portStartAddr)  // Port
+    if (address >= portStartAddr ||
+        m_Configuration == BK_CONF_IM01 && address >= 0000076 && address <= 0000077)  // Port
     {
         *pOffset = address;
         return ADDRTYPE_IO;
@@ -480,6 +483,12 @@ int CMotherboard::TranslateAddress(uint16_t address, bool /*okHaltMode*/, bool /
         return ADDRTYPE_DENY;
 
     if (address < 0060000)  // 020000..057777 - ROM
+    {
+        *pOffset = address - 0020000;
+        return ADDRTYPE_ROM;
+    }
+
+    if (m_Configuration == BK_CONF_IM05 && address < 0100000)  // 060000..077777 - ROM 8K, IM-05 only
     {
         *pOffset = address - 0020000;
         return ADDRTYPE_ROM;
@@ -517,6 +526,9 @@ uint16_t CMotherboard::GetPortWord(uint16_t address)
 
     switch (address)
     {
+    case 0000076:
+        return 077;  //HACK
+
     case 0164004:  // ???
     case 0170004:  // ???
         return 0;//STUB
@@ -623,6 +635,9 @@ void CMotherboard::SetPortWord(uint16_t address, uint16_t word)
 
     switch (address)
     {
+    case 0000076:  //HACK
+        break;
+
     case 0164004:  // ???
     case 0170004:  // ???
         break;
