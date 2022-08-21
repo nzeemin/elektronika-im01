@@ -25,7 +25,7 @@ ELEKTRONIKA-IM01. If not, see <http://www.gnu.org/licenses/>. */
 
 
 CMotherboard* g_pBoard = nullptr;
-BKConfiguration g_nEmulatorConfiguration;  // Current configuration
+EmuConfiguration g_nEmulatorConfiguration;  // Current configuration
 bool g_okEmulatorRunning = false;
 
 int m_wEmulatorCPUBpsCount = 0;
@@ -141,18 +141,18 @@ void Emulator_Done()
     ::free(g_pEmulatorChangedRam);
 }
 
-BKConfiguration Emulator_GetConfiguration()
+EmuConfiguration Emulator_GetConfiguration()
 {
-    return (BKConfiguration)g_pBoard->GetConfiguration();
+    return (EmuConfiguration)g_pBoard->GetConfiguration();
 }
 
-bool Emulator_InitConfiguration(BKConfiguration configuration)
+bool Emulator_InitConfiguration(EmuConfiguration configuration)
 {
     g_pBoard->SetConfiguration((uint16_t)configuration);
 
     uint8_t buffer[8192];
 
-    if (configuration == BK_CONF_IM01)
+    if (configuration == EMU_CONF_IM01)
     {
         if (!Emulator_LoadRomFile(FILENAME_ROM_106, buffer, 0, 8192))
         {
@@ -168,7 +168,7 @@ bool Emulator_InitConfiguration(BKConfiguration configuration)
         }
         g_pBoard->LoadROM(0, buffer);
     }
-    else if (configuration == BK_CONF_IM01T)
+    else if (configuration == EMU_CONF_IM01T)
     {
         if (!Emulator_LoadRomFile(FILENAME_ROM_148, buffer, 0, 8192))
         {
@@ -184,7 +184,7 @@ bool Emulator_InitConfiguration(BKConfiguration configuration)
         }
         g_pBoard->LoadROM(1, buffer);
     }
-    else if (configuration == BK_CONF_IM05)
+    else if (configuration == EMU_CONF_IM05)
     {
         if (!Emulator_LoadRomFile(FILENAME_ROM_205, buffer, 0, 8192))
         {
@@ -216,6 +216,19 @@ bool Emulator_InitConfiguration(BKConfiguration configuration)
     m_dwEmulatorUptime = 0;
 
     return true;
+}
+
+LPCTSTR Emulator_GetConfigurationName()
+{
+    uint16_t configuration = g_pBoard->GetConfiguration();
+
+    switch (configuration)
+    {
+    default:
+    case EMU_CONF_IM01:  return _T("Elektronika IM-01");
+    case EMU_CONF_IM01T: return _T("Elektronika IM-01T");
+    case EMU_CONF_IM05:  return _T("Elektronika IM-05");
+    }
 }
 
 void Emulator_Start()

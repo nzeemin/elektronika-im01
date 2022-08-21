@@ -35,7 +35,7 @@ CMotherboard::CMotherboard ()
     m_pRAM = (uint8_t*) ::malloc(64 * 1024);
     m_pROM = (uint8_t*) ::calloc(64 * 1024, 1);
 
-    SetConfiguration(BK_CONF_IM01);  // Default configuration
+    SetConfiguration(EMU_CONF_IM01);  // Default configuration
 
     Reset();
 }
@@ -330,7 +330,7 @@ void CMotherboard::KeyboardEvent(uint8_t scancode, bool okPressed)
 {
     int col = (scancode & 0070) >> 3;  // 0..5
     int row = scancode & 0003;  // 0..3
-    if (m_Configuration == BK_CONF_IM05)
+    if (m_Configuration == EMU_CONF_IM05)
         row = 3 - row;
 
     if (okPressed)
@@ -467,7 +467,7 @@ int CMotherboard::TranslateAddress(uint16_t address, bool /*okHaltMode*/, bool /
 {
     uint16_t portStartAddr = 0164000;
     if (address >= portStartAddr ||
-        m_Configuration == BK_CONF_IM01 && address >= 0000076 && address <= 0000077)  // Port
+        m_Configuration == EMU_CONF_IM01 && address >= 0000076 && address <= 0000077)  // Port
     {
         *pOffset = address;
         return ADDRTYPE_IO;
@@ -488,7 +488,7 @@ int CMotherboard::TranslateAddress(uint16_t address, bool /*okHaltMode*/, bool /
         return ADDRTYPE_ROM;
     }
 
-    if (m_Configuration == BK_CONF_IM05 && address < 0100000)  // 060000..077777 - ROM 8K, IM-05 only
+    if (m_Configuration == EMU_CONF_IM05 && address < 0100000)  // 060000..077777 - ROM 8K, IM-05 only
     {
         *pOffset = address - 0020000;
         return ADDRTYPE_ROM;

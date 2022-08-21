@@ -21,11 +21,11 @@ class CProcessor;
 //////////////////////////////////////////////////////////////////////
 
 // Machine configurations
-enum BKConfiguration
+enum EmuConfiguration
 {
-    BK_CONF_IM01  = 1,
-    BK_CONF_IM01T = 2,
-    BK_CONF_IM05  = 5,
+    EMU_CONF_IM01  = 1,
+    EMU_CONF_IM01T = 2,
+    EMU_CONF_IM05  = 5,
 };
 
 

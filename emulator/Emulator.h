@@ -22,7 +22,7 @@ const int MAX_BREAKPOINTCOUNT = 16;
 const int MAX_WATCHPOINTCOUNT = 16;
 
 extern CMotherboard* g_pBoard;
-extern BKConfiguration g_nEmulatorConfiguration;  // Current configuration
+extern EmuConfiguration g_nEmulatorConfiguration;  // Current configuration
 extern bool g_okEmulatorRunning;
 
 extern uint8_t* g_pEmulatorRam;  // RAM values - for change tracking
@@ -35,8 +35,9 @@ extern uint16_t g_wEmulatorPrevCpuPC;  // Previous PC value
 
 
 bool Emulator_Init();
-bool Emulator_InitConfiguration(BKConfiguration configuration);
-BKConfiguration Emulator_GetConfiguration();
+bool Emulator_InitConfiguration(EmuConfiguration configuration);
+EmuConfiguration Emulator_GetConfiguration();
+LPCTSTR Emulator_GetConfigurationName();
 void Emulator_Done();
 
 bool Emulator_AddCPUBreakpoint(uint16_t address);

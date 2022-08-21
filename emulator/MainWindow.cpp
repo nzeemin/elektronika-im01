@@ -58,7 +58,7 @@ void MainWindow_DoEmulatorSpeed(WORD speed);
 void MainWindow_DoEmulatorSound();
 void MainWindow_DoFileSaveState();
 void MainWindow_DoFileLoadState();
-void MainWindow_DoEmulatorConf(BKConfiguration configuration);
+void MainWindow_DoEmulatorConf(EmuConfiguration configuration);
 void MainWindow_DoFileSettings();
 void MainWindow_DoFileSettingsColors();
 
@@ -134,6 +134,7 @@ BOOL CreateMainWindow()
     UpdateWindow(g_hwnd);
     MainWindow_UpdateAllViews();
     MainWindow_UpdateMenu();
+    MainWindow_UpdateWindowTitle();
 
     // Autostart
     if (Settings_GetAutostart())
@@ -243,9 +244,10 @@ void MainWindow_RestorePositionAndShow()
 
 void MainWindow_UpdateWindowTitle()
 {
+    LPCTSTR confName = Emulator_GetConfigurationName();
     LPCTSTR emustate = g_okEmulatorRunning ? _T("run") : _T("stop");
     TCHAR buffer[100];
-    _sntprintf(buffer, sizeof(buffer) / sizeof(TCHAR) - 1, _T("%s [%s]"), g_szTitle, emustate);
+    _sntprintf(buffer, sizeof(buffer) / sizeof(TCHAR) - 1, _T("%s - %s - [%s]"), g_szTitle, confName, emustate);
     SetWindowText(g_hwnd, buffer);
 }
 
@@ -619,9 +621,9 @@ void MainWindow_UpdateMenu()
     UINT configcmd = 0;
     switch (g_nEmulatorConfiguration)
     {
-    case BK_CONF_IM01:  configcmd = ID_CONF_BK0010BASIC; break;
-    case BK_CONF_IM01T: configcmd = ID_CONF_BK0010FOCAL; break;
-    case BK_CONF_IM05:  configcmd = ID_CONF_IM05;  break;
+    case EMU_CONF_IM01:  configcmd = ID_CONF_BK0010BASIC; break;
+    case EMU_CONF_IM01T: configcmd = ID_CONF_BK0010FOCAL; break;
+    case EMU_CONF_IM05:  configcmd = ID_CONF_IM05;  break;
     }
     CheckMenuRadioItem(hMenu, ID_CONF_BK0010BASIC, ID_CONF_IM05, configcmd, MF_BYCOMMAND);
 
@@ -693,13 +695,13 @@ bool MainWindow_DoCommand(int commandId)
         MainWindow_DoEmulatorSpeed(2);
         break;
     case ID_CONF_BK0010BASIC:
-        MainWindow_DoEmulatorConf(BK_CONF_IM01);
+        MainWindow_DoEmulatorConf(EMU_CONF_IM01);
         break;
     case ID_CONF_BK0010FOCAL:
-        MainWindow_DoEmulatorConf(BK_CONF_IM01T);
+        MainWindow_DoEmulatorConf(EMU_CONF_IM01T);
         break;
     case ID_CONF_IM05:
-        MainWindow_DoEmulatorConf(BK_CONF_IM05);
+        MainWindow_DoEmulatorConf(EMU_CONF_IM05);
         break;
     case ID_VIEW_DEBUG:
         MainWindow_DoViewDebug();
@@ -835,7 +837,7 @@ void MainWindow_DoFileSettingsColors()
     }
 }
 
-void MainWindow_DoEmulatorConf(BKConfiguration configuration)
+void MainWindow_DoEmulatorConf(EmuConfiguration configuration)
 {
     // Check if configuration changed
     if (g_nEmulatorConfiguration == configuration)
@@ -851,6 +853,7 @@ void MainWindow_DoEmulatorConf(BKConfiguration configuration)
     Settings_SetConfiguration(configuration);
 
     MainWindow_UpdateMenu();
+    MainWindow_UpdateWindowTitle();
     MainWindow_UpdateAllViews();
     KeyboardView_Update();
 }

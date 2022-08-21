@@ -153,7 +153,7 @@ CAPTION "About"
 FONT 8, "MS Shell Dlg", 400, 0, 0xCC
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,211,10,57,15,WS_GROUP
-    LTEXT           "Elektronika IM-01 Version 1.0.???",IDC_VERSION,10,10,139,8,SS_NOPREFIX
+    LTEXT           "Back to Life! Version 1.0.???",IDC_VERSION,10,10,139,8,SS_NOPREFIX
     LTEXT           "Build date: ????",IDC_BUILDDATE,10,20,139,8
     CONTROL         "<a>https://github.com/nzeemin/elektronika-im01</a>",IDC_SYSLINK1,"SysLink",WS_TABSTOP,10,32,193,10
     LTEXT           "Copyright (C) 2021",IDC_STATIC,10,44,139,8
@@ -258,7 +258,7 @@ IDB_PANEL               BITMAP                  "Panel.bmp"
 
 STRINGTABLE 
 BEGIN
-    IDS_APP_TITLE           "Elektronika IM-01"
+    IDS_APP_TITLE           "Back to Life!"
     IDC_APPLICATION         "ELEKTRONIKAIM01"
 END
 

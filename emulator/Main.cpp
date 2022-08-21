@@ -179,8 +179,8 @@ BOOL InitInstance(HINSTANCE /*hInstance*/, int /*nCmdShow*/)
         return FALSE;
 
     int conf = Settings_GetConfiguration();
-    if (conf == 0) conf = BK_CONF_IM01;
-    if (!Emulator_InitConfiguration((BKConfiguration)conf))
+    if (conf == 0) conf = EMU_CONF_IM01;
+    if (!Emulator_InitConfiguration((EmuConfiguration)conf))
         return FALSE;
 
     Emulator_SetSound(Settings_GetSound() != 0);

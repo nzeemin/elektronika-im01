@@ -2,14 +2,19 @@
 
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 
-This project aim is to emulate soviet chess computers "Электроника ИМ-01", "Электроника ИМ-01Т" and "Электроника ИМ-05".
+This project is part of "Back to Life!" series of emulators, and it emulates some soviet chess computers:
+* "Elektronika IM-01"
+* "Elektronika IM-01T"
+* "Elektronika IM-05"
 
 ![](docs/emulator-main.png)
 
 ## На русском
 
-Данный проект имеет целью эмуляцию советских шахматных компьютеров "Электроника ИМ-01", "Электроника ИМ-01Т" и "Электроника ИМ-05".
-Проект основан на коде эмулятора BKBTL.
+Данный проект это эмулятор из серии "Back to Life!", и он эмулирует некоторые советские шахматные компьютеры:
+* "Электроника ИМ-01"
+* "Электроника ИМ-01Т"
+* "Электроника ИМ-05"
 
 Образы ПЗУ для ИМ-01/ИМ-01Т считал и предоставил Егор Лосев (Radon17).<br>
 Образы ПЗУ для ИМ-05 считал и предоставил Леонид Ядренников (RCgoff).

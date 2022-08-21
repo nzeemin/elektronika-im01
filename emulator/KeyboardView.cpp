@@ -232,7 +232,7 @@ void KeyboardView_UpdateIndicator()
     {
         uint8_t newval = g_pBoard->GetIndicator(4 - i);
 
-        if (g_pBoard->GetConfiguration() == BK_CONF_IM05)
+        if (g_pBoard->GetConfiguration() == EMU_CONF_IM05)
         {
             // bits remapping for IM-05, bits order is [0,1,6,4,2,3,5,7]
             newval = (newval & 0x83) | (newval & 0x0c) << 2 | (newval & 0x10) >> 1 | (newval & 0x20) << 1 | (newval & 0x40) >> 4;

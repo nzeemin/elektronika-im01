@@ -241,8 +241,8 @@ void ScreenView_OnDraw(HDC hdc)
 BYTE GetChessFugure(int row, int col)
 {
     uint16_t baseaddr = 000660;
-    if (g_nEmulatorConfiguration == BK_CONF_IM01T) baseaddr = 000610;
-    else if (g_nEmulatorConfiguration == BK_CONF_IM05) baseaddr = 000670;
+    if (g_nEmulatorConfiguration == EMU_CONF_IM01T) baseaddr = 000610;
+    else if (g_nEmulatorConfiguration == EMU_CONF_IM05) baseaddr = 000670;
 
     uint16_t addr = baseaddr + (7 - row) * 8 + (7 - col);
 
